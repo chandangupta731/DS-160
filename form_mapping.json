@@ -1,0 +1,78 @@
+{
+    "surnames": {
+      "locatorType": "id",
+      "locatorValue": "surnames",
+      "fieldType": "text"
+    },
+    "given_names": {
+      "locatorType": "id",
+      "locatorValue": "given_names",
+      "fieldType": "text"
+    },
+    "full_name_native": {
+      "locatorType": "id",
+      "locatorValue": "full_name_native",
+      "fieldType": "text"
+    },
+    "full_name_native_na": {
+      "locatorType": "id",
+      "locatorValue": "full_name_native_na",
+      "fieldType": "checkbox"
+    },
+    "other_names_used": {
+      "locatorType": "name",
+      "locatorValue": "other_names_used",
+      "fieldType": "radio"
+    },
+    "has_telecode": {
+      "locatorType": "name",
+      "locatorValue": "has_telecode",
+      "fieldType": "radio"
+    },
+    "sex": {
+      "locatorType": "id",
+      "locatorValue": "sex",
+      "fieldType": "select"
+    },
+    "marital_status": {
+      "locatorType": "id",
+      "locatorValue": "marital_status",
+      "fieldType": "select"
+    },
+    "dob_day": {
+      "locatorType": "id",
+      "locatorValue": "dob_day",
+      "fieldType": "select"
+    },
+    "dob_month_abbr": {
+      "locatorType": "id",
+      "locatorValue": "dob_month",
+      "fieldType": "select"
+    },
+    "dob_year": {
+      "locatorType": "id",
+      "locatorValue": "dob_year",
+      "fieldType": "text"
+    },
+     "pob_city": {
+      "locatorType": "id",
+      "locatorValue": "pob_city",
+      "fieldType": "text"
+    },
+    "pob_state_province": {
+      "locatorType": "id",
+      "locatorValue": "pob_state_province",
+      "fieldType": "text"
+    },
+     "pob_state_province_na": {
+      "locatorType": "id",
+      "locatorValue": "pob_state_province_na",
+      "fieldType": "checkbox"
+    },
+    "pob_country": {
+      "locatorType": "id",
+      "locatorValue": "pob_country",
+      "fieldType": "select"
+    }
+  }
+  

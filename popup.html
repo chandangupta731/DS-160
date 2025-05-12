@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Filler</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            width: 300px; /* Increased width for longer names */
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        select { /* Style the dropdown */
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+            background-color: white; /* Ensure background is white */
+            height: 35px; /* Consistent height */
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        button:hover:not(:disabled) { /* Only apply hover when not disabled */
+            background-color: #0056b3;
+        }
+        button:disabled { /* Style for disabled button */
+             background-color: #cccccc;
+             cursor: not-allowed;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+            min-height: 1.2em; /* Prevent layout shifts */
+            word-wrap: break-word; /* Wrap long messages */
+        }
+        .error {
+            color: #dc3545; /* Red for errors */
+            font-weight: bold;
+        }
+        .success {
+            color: #28a745; /* Green for success */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <label for="userSelect">Select User:</label>
+    <select id="userSelect">
+        <option value="">Loading users...</option> </select>
+
+    <button id="fillButton" disabled>Fill Form</button> <div id="status"></div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

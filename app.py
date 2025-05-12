@@ -38,8 +38,8 @@ app = Flask(__name__)
 # --- Configuration ---
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'docx'}
-API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyA6-YdUVWyqV9uqEFApTS8q0lysHL9qV1s") # Needed for image analysis
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.0")
+API_KEY = os.environ.get("GEMINI_API_KEY", "") # Needed for image analysis
+MONGO_URI = os.environ.get("MONGO_URI", "")
 MONGO_DB_NAME = "id_docs_db"
 MONGO_USERS_COLLECTION_NAME = "users"
 MONGO_DOCUMENTS_COLLECTION_NAME = "documents"

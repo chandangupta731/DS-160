@@ -7,66 +7,105 @@
     <style>
         body {
             font-family: sans-serif;
-            width: 300px; /* Increased width for longer names */
-            padding: 10px;
-            background-color: #f4f4f4;
+            width: 320px; /* Slightly wider for search bar */
+            padding: 15px; /* Increased padding */
+            background-color: #f7f9fc; /* Lighter background */
+            color: #333;
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
+            margin-bottom: 6px; /* Adjusted margin */
+            font-weight: 600; /* Slightly bolder */
+            font-size: 0.95em;
+            color: #454545;
         }
-        select { /* Style the dropdown */
+        input[type="text"], select {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
+            padding: 10px; /* Increased padding */
+            margin-bottom: 12px; /* Adjusted margin */
+            border: 1px solid #d1d5db; /* Softer border */
+            border-radius: 6px; /* More rounded */
             box-sizing: border-box;
-            background-color: white; /* Ensure background is white */
-            height: 35px; /* Consistent height */
+            background-color: white;
+            height: 40px; /* Consistent height */
+            font-size: 0.9em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+            outline: none;
         }
         button {
             padding: 10px 15px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 6px; /* More rounded */
             cursor: pointer;
             width: 100%;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            font-weight: 500;
+            font-size: 0.95em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        button:hover:not(:disabled) { /* Only apply hover when not disabled */
+        button:hover:not(:disabled) {
             background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        button:disabled { /* Style for disabled button */
-             background-color: #cccccc;
-             cursor: not-allowed;
+        button:disabled {
+            background-color: #e9ecef; /* Lighter disabled color */
+            color: #6c757d; /* Text color for disabled */
+            cursor: not-allowed;
+            box-shadow: none;
         }
         #status {
-            margin-top: 10px;
+            margin-top: 12px; /* Adjusted margin */
             font-size: 0.9em;
             color: #555;
-            min-height: 1.2em; /* Prevent layout shifts */
-            word-wrap: break-word; /* Wrap long messages */
+            min-height: 1.2em;
+            word-wrap: break-word;
+            padding: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            text-align: center;
         }
         .error {
-            color: #dc3545; /* Red for errors */
-            font-weight: bold;
+            color: #b30000; /* Darker red */
+            background-color: #ffebee; /* Light red background */
+            font-weight: 500;
+            border: 1px solid #ffcdd2;
         }
         .success {
-            color: #28a745; /* Green for success */
-            font-weight: bold;
+            color: #155724; /* Darker green */
+            background-color: #d4edda; /* Light green background */
+            font-weight: 500;
+            border: 1px solid #c3e6cb;
+        }
+        .info { /* Style for general info messages */
+            color: #004085;
+            background-color: #cce5ff;
+            border: 1px solid #b8daff;
+        }
+        /* Styling for the search input container */
+        .search-container {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
+    <div class="search-container">
+        <label for="userSearchInput">Search User:</label>
+        <input type="text" id="userSearchInput" placeholder="Type to search...">
+    </div>
+
     <label for="userSelect">Select User:</label>
     <select id="userSelect">
-        <option value="">Loading users...</option> </select>
+        <option value="">Loading users...</option>
+    </select>
 
-    <button id="fillButton" disabled>Fill Form</button> <div id="status"></div>
+    <button id="fillButton" disabled>Fill Form</button>
+    <div id="status"></div>
 
     <script src="popup.js"></script>
 </body>

@@ -1,17 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "MongoDB Form Filler (Label-Based - All URLs)",
-  "version": "1.0",
-  "description": "Autofills web forms using label matching and data from a MongoDB backend API.",
+  "name": "MongoDB Form Filler (Auto-Trigger)",
+  "version": "1.1",
+  "description": "Autofills web forms using stored user data, triggered on page load.",
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
+    "https://ceac.state.gov/GenNIV/*",
     "http://localhost:5000/*"
-  
-                    
   ],
   "action": {
     "default_popup": "popup.html",
@@ -21,13 +21,16 @@
       "128": "images/icon128.png"
     }
   },
-  "background": {},
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": [
-         "<all_urls>" 
+        "<all_urls>"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
   "icons": {

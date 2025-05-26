@@ -51,19 +51,19 @@ const formFieldMapping = [
     // --- Other Personal Info ---
     {
         form_key: "place_of_birth",
-        label_texts: ["City"], // Use specific label
+        //label_texts: ["City"], // Use specific label
         api_keys: ["pob_city", "Place of Birth", "placeOfBirth", "birthPlace", "geburtsort"],
         field_type: "text",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_POB_CITY" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[3]/div[1]/div/div/div[2]/input" } // VERIFY ID
     },
-    // --- POB State/Province Mappings ---
-    // {
-    //     form_key: "pob_state",
-    //     label_texts: ["State/Province"], // Use specific label
-    //     api_keys: ["pob_state_province"], // Filled only if pob_state_na is false/N
-    //     field_type: "text",
-    //     locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_POB_ST_PROVINCE" } // VERIFY ID
-    // },
+    //--- POB State/Province Mappings ---
+    {
+        form_key: "pob_state",
+        //label_texts: ["State/Province"], // Use specific label
+        api_keys: ["pob_state_province"], // Filled only if pob_state_na is false/N
+        field_type: "text",
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[3]/div[1]/div/div/div[3]/input" } // VERIFY ID
+    },
     {
         form_key: "pob_state_na",
         //label_texts: ["Does Not Apply"], // Label for the checkbox
@@ -74,10 +74,10 @@ const formFieldMapping = [
     // --- POB Country ---
     {
         form_key: "country_of_birth",
-        label_texts: ["Country/Region"], // Use specific label
+        //label_texts: ["Country/Region"], // Use specific label
         api_keys: ["pob_country", "Country_Code", "countryOfBirth", "birthCountryCode"],
         field_type: "select",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlAPP_POB_CNTRY" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[3]/div[1]/div/div/select" } // VERIFY ID
     },
     {
         form_key: "sex",
@@ -96,7 +96,7 @@ const formFieldMapping = [
     {
         form_key: "current_nationality",
         label_texts: ["Current nationality"],
-        api_keys: ["nationality", "Nationality"],
+        api_keys: ["nationality", "Nationality","Country_Code"],
         field_type: "select",
         locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlAPP_NATL"} // VERIFY ID
     },
@@ -110,10 +110,10 @@ const formFieldMapping = [
     // --- Checkboxes/Radios ---
     {
         form_key: "full_name_native_na",
-        label_texts: ["Does Not Apply/Technology Not Available"],
+        label_texts: [""], 
         api_keys: ["full_name_native_na", "native_name_na"],
         field_type: "checkbox",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbexAPP_FULL_NAME_NATIVE_NA" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[1]/div[1]/div[3]/div/span/span/input" } // VERIFY ID
     },
     {
         form_key: "other_names_used",
@@ -131,7 +131,7 @@ const formFieldMapping = [
     },
     {
         form_key: "other_nationality_held",
-        label_texts: ["Do you hold or have you held any nationality other"],
+        label_texts: ["Do you hold or have you held any nationality other than the one indicated above on nationality?"],
         api_keys: ["has_other_nationality", "other_nationalities"],
         field_type: "radio",
         locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblAPP_OTH_NATL_IND" } // VERIFY Name
@@ -145,26 +145,26 @@ const formFieldMapping = [
     },
     {
         form_key: "ssn_na",
-        label_texts: ["U.S. Social Security Number", "Does Not Apply"],
-        api_keys: ["ssn_not_applicable"],
+        label_texts: [""],
+        api_keys: [""],
         field_type: "checkbox",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbexAPP_SSN_NA" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[3]/div[1]/div[2]/span[3]/span/input" } // VERIFY ID
     },
     {
         form_key: "tax_id_na",
-        label_texts: ["U.S. Taxpayer ID Number", "Does Not Apply"],
+        label_texts: [""],
         api_keys: ["tax_id_not_applicable"],
         field_type: "checkbox",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbexAPP_TAX_ID_NA"} // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[3]/div[1]/div[3]/div/span/span/input"} // VERIFY ID
     },
     // --- Passport/ID Info ---
     // POB State/Province mappings moved up near POB City/Country
     {
-        form_key: "place_of_issue",
-        label_texts: ["City"],
-        api_keys: ["Place of Issue","Place_of_Issue", "poi_city", "placeOfIssue"],
+        form_key: "Passport_place_of_issue",
+        //label_texts: ["City"],
+        api_keys: ["Place_of_Issue"],
         field_type: "text",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxPPT_ISSUED_IN_CITY"} // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[2]/div[2]/div/div[3]/div/div[1]/input"} // VERIFY ID
     },
     {
         form_key: "passport_issue_country",
@@ -175,10 +175,10 @@ const formFieldMapping = [
     },
     {
         form_key: "issue_country",
-        label_texts: ["Country/Region"],
+        //label_texts: ["Country/Region"],
         api_keys: ["Country_Code"], // API key from your Flask app
         field_type: "select",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlPPT_ISSUED_IN_CNTRY" }
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[2]/div[2]/div/div[3]/div/div[3]/select" }
     },
     {
         form_key: "passport_number",
@@ -314,6 +314,93 @@ const formFieldMapping = [
         field_type: "select",
         locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlWhoIsPaying" } // VERIFY ID
     },
+    
+    {
+    form_key: "trip_payer_surname_text",
+    label_texts: ["Surnames of Person Paying for Trip"],
+    api_keys: ["trip_payer_surname"], // From your formData
+    field_type: "text",
+    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxPayerSurname" }
+},
+{
+    form_key: "trip_payer_given_name_text",
+    label_texts: ["Given Names of Person Paying for Trip"],
+    api_keys: ["trip_payer_given_name"], // From your formData
+    field_type: "text",
+    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxPayerGivenName" }
+},
+{
+    form_key: "trip_payer_phone_text",
+    label_texts: ["Telephone Number"], // Label for Payer's Telephone
+    api_keys: ["trip_payer_telephone"], // From your formData
+    field_type: "text",
+    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxPayerPhone" }
+},
+{
+    form_key: "trip_payer_email_text",
+    label_texts: ["Email Address"], // Label for Payer's Email
+    api_keys: ["trip_payer_email"], // From your formData
+    field_type: "text",
+    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxPAYER_EMAIL_ADDR" }
+},
+{
+    form_key: "trip_payer_relationship_select",
+    label_texts: ["Relationship to You"], // Label for Payer's Relationship
+    api_keys: ["trip_payer_relationship"], // From your formData
+    field_type: "select",
+    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlPayerRelationship" }
+},
+{
+    form_key: "payer_address_same_radio",
+    label_texts: ["Is the address of the party paying for your trip the same as your Home or Mailing Address?"],
+    api_keys: ["trip_payer_address_same_as_home"], // From your formData
+    field_type: "radio",
+    locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblPayerAddrSameAsInd" }
+},
+
+{
+    form_key: "payer_address_street1",
+    //label_texts: ["Street Address (Line 1)"], // Context: Payer Address
+    api_keys: ["payer_address_street_line1"], // No direct API key in provided formData for this specific field
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[4]/div/fieldset/div[2]/div/div/div[6]/div/div[1]/input" }
+},
+{
+    form_key: "payer_address_street2",
+    //label_texts: ["Street Address (Line 2)"], // Context: Payer Address
+    api_keys: ["payer_address_street_line2"], // No direct API key
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[4]/div/fieldset/div[2]/div/div/div[6]/div/div[2]/input" }
+},
+{
+    form_key: "payer_address_city",
+    //label_texts: ["City"], // Context: Payer Address
+    api_keys: ["payer_address_city"], // No direct API key
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[4]/div/fieldset/div[2]/div/div/div[6]/div/div[3]/input" }
+},
+{
+    form_key: "payer_address_state",
+    //label_texts: ["State/Province"], // Context: Payer Address
+    api_keys: ["payer_address_state"], // No direct API key
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[4]/div/fieldset/div[2]/div/div/div[6]/div/div[4]/div/input" }
+},
+{
+    form_key: "payer_address_postal",
+    //label_texts: ["Postal Zone/ZIP Code"], // Context: Payer Address
+    api_keys: ["payer_address_zip_code"], // No direct API key
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[4]/div/fieldset/div[2]/div/div/div[6]/div/div[5]/div/input" }
+},
+{
+    form_key: "payer_address_country",
+    //label_texts: ["Country/Region"], // Context: Payer Address
+    api_keys: ["payer_address_country"], // No direct API key, might default or be parsed
+    field_type: "select",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[4]/div/fieldset/div[2]/div/div/div[6]/div/div[6]/select" }
+},
+// End of Trip Payer Section Mappings
     {
         form_key: "specific_travel_plans",
         label_texts: ["Have you made specific travel plans?"],
@@ -383,44 +470,37 @@ const formFieldMapping = [
     {
         form_key: "us_address_street1",
         //label_texts: ["Street Address (Line 1)"],
-        api_keys: [], // Filled by 'us_stay_address' logic
+        api_keys: ["us_stay_address_line1"], // Filled by 'us_stay_address' logic
         field_type: "text",
         locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div/div/div/div[2]/div[1]/input" } // VERIFY ID
     },
     {
         form_key: "us_address_street2",
         //label_texts: ["Street Address (Line 2)"],
-        api_keys: [], // Filled by 'us_stay_address' logic
+        api_keys: ["us_stay_address_line2"], // Filled by 'us_stay_address' logic
         field_type: "text",
         locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div/div/div/div[2]/div[2]/input" } // VERIFY ID
     },
     {
         form_key: "us_address_city",
         //label_texts: ["City"],
-        api_keys: [], // Filled by 'us_stay_address' logic
+        api_keys: ["us_stay_address_city"], // Filled by 'us_stay_address' logic
         field_type: "text",
         locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div/div/div/div[2]/div[3]/input" } // VERIFY ID
     },
     {
         form_key: "us_address_state",
         //label_texts: ["State"],
-        api_keys: [], // Filled by 'us_stay_address' logic
+        api_keys: ["us_stay_address_state"], // Filled by 'us_stay_address' logic
         field_type: "select",
         locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div/div/div/div[2]/div[4]/select" } // VERIFY ID
     },
     {
         form_key: "us_address_zip",
         //label_texts: ["ZIP Code"],
-        api_keys: [], // Filled by 'us_stay_address' logic
+        api_keys: ["us_stay_address_zip_code"], // Filled by 'us_stay_address' logic
         field_type: "text",
         locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div/div/div/div[2]/div[5]/input" } // VERIFY ID
-    },
-    // --- Mapping for Full US Stay Address Data Source ---
-    {
-        form_key: "us_stay_address", // Key to trigger address parsing
-        label_texts: ["Address Where You Will Stay in the U.S."], // Text to check for conditional filling
-        api_keys: ["us_stay_address"], // API key from Flask app
-        field_type: "hidden" // Holds the full address string for parsing
     },
     // --- Mappings for Previous US Travel ---
     {
@@ -445,6 +525,13 @@ const formFieldMapping = [
         locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblPREV_VISA_REFUSED_IND" } // VERIFY Name
     },
     {
+        form_key: "prev_visa_refused_details",
+        //label_texts: ["Have you ever been refused a U.S. Visa"], // Partial label match
+        api_keys: ["previous_us_visa_refusal_details"], // API key from Flask app
+        field_type: "textarea",
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[5]/fieldset/div[1]/div/div[2]/div/div/textarea" } // VERIFY Name
+    },
+    {
         form_key: "iv_petition_filed",
         label_texts: ["Has anyone ever filed an immigrant petition on your behalf"], // Partial label match
         api_keys: ["immigrant_petition_filed"], // API key from Flask app
@@ -454,24 +541,31 @@ const formFieldMapping = [
     // --- Mappings for Home Address ---
     {
         form_key: "home_address_street1",
-        label_texts: ["Street Address (Line 1)"], // Label within Home Address section
-        api_keys: [], // Filled by 'home_address' logic
+        //label_texts: ["Street Address (Line 1)"], // Label within Home Address section
+        api_keys: ["home_address_line1"], // Filled by 'home_address' logic
         field_type: "text",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_LN1" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[1]/input" } // VERIFY ID
     },
     {
         form_key: "home_address_street2",
-        label_texts: ["Street Address (Line 2)"],
-        api_keys: [],
+        //label_texts: ["Street Address (Line 2)"],
+        api_keys: ["home_address_line2"],
         field_type: "text",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_LN2" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[2]/input" } // VERIFY ID
     },
     {
         form_key: "home_address_city",
-        label_texts: ["City"],
-        api_keys: [],
+        //label_texts: ["City"],
+        api_keys: ["home_address_city"],
         field_type: "text",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_CITY" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[3]/input" } // VERIFY ID
+    },
+    {
+        form_key: "home_address_state",
+        //label_texts: ["Does Not Apply"], // Checkbox associated with Home Address State
+        api_keys: ["home_address_state"], // We will likely hardcode this or determine based on parsing
+        field_type: "text",
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[4]/input[1]" } // VERIFY ID
     },
     {
         form_key: "home_address_state_na",
@@ -482,31 +576,24 @@ const formFieldMapping = [
     },
     {
         form_key: "home_address_postal",
-        label_texts: ["Postal Zone/ZIP Code"],
-        api_keys: [],
+        //label_texts: ["Postal Zone/ZIP Code"],
+        api_keys: ["home_address_zip"],
         field_type: "text",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxAPP_ADDR_POSTAL_CD" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[5]/input[1]" } // VERIFY ID
     },
     {
         form_key: "home_address_postal_na",
-        label_texts: ["Does Not Apply"], // Checkbox associated with Home Address Postal Code
+        //label_texts: ["Does Not Apply"], // Checkbox associated with Home Address Postal Code
         api_keys: [],
         field_type: "checkbox",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbexAPP_ADDR_POSTAL_CD_NA" } // VERIFY ID
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[5]/input[1]" } // VERIFY ID
     },
     {
         form_key: "home_address_country",
-        label_texts: ["Country/Region"],
+        //label_texts: ["Country/Region"],
         api_keys: [], // Assuming country comes from elsewhere or defaults
         field_type: "select",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlCountry" } // VERIFY ID
-    },
-    // --- Mapping for Full Home Address Data Source ---
-    {
-        form_key: "home_address", // Key to trigger home address parsing
-        label_texts: ["Home Address"], // Section header
-        api_keys: ["home_address"], // API key from Flask app
-        field_type: "hidden" // Holds the full address string for parsing
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[1]/div/div/div[6]/select" } // VERIFY ID
     },
     // In formFieldMapping array, before Mailing Address component mappings:
     {
@@ -519,10 +606,10 @@ const formFieldMapping = [
     // Inside the formFieldMapping array, for example, after the national_id_na mapping:
     {
         form_key: "work_phone_na", // Logical key for work phone "Does Not Apply"
-        label_texts: ["Does Not Apply"], // Label for the checkbox
+        label_texts: [""], // Label for the checkbox
         api_keys: [], // Not controlled by API if we are hardcoding it
         field_type: "checkbox",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbexAPP_BUS_TEL_NA" } // ID from your HTML
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[3]/div[1]/div[3]/span[3]/span/input" } // ID from your HTML
     },
     {
         form_key: "primary_phone",
@@ -596,10 +683,10 @@ const formFieldMapping = [
     },
     {
         form_key: "passport_book_number_na",
-        label_texts: ["Does Not Apply"],
+        label_texts: [""],
         api_keys: [],
         field_type: "checkbox",
-        locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbexPPT_BOOK_NUM_NA" } // ID for the checkbox
+        locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset[2]/div[2]/div/div[1]/span[3]/span/input" } // ID for the checkbox
     },
     {
         form_key: "lost_or_stolen_passport", // A unique key for this field
@@ -654,7 +741,7 @@ const formFieldMapping = [
     
     // Relationship to You (for the contact person/organization)
     {
-        form_key: "us_contact_relationship",
+        form_key: "us_contact_relationship_select",
         label_texts: ["Relationship to You"], // Label text from the snippet
         api_keys: ["us_contact_relationship"], // API key from your Flask app
         field_type: "select",
@@ -666,9 +753,16 @@ const formFieldMapping = [
 {
     form_key: "us_contact_address_street1", // Target field on the form
     //label_texts: ["U.S. Street Address (Line 1)"], // Label from HTML
-    api_keys: ["us_contact_street_address"], // Filled by parsing 'us_contact_address'
+    api_keys: ["us_contact_street_address_line1"], // Filled by parsing 'us_contact_address'
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset/div/div[3]/div/div/div[1]/input" } // ID from HTML
+},
+{
+    form_key: "us_contact_address_street2", // Target field
+    //label_texts: ["U.S. Street Address (Line 2)"],
+    api_keys: ["us_contact_street_address_line2"],
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset/div/div[3]/div/div/div[2]/input" }
 },
 {
     form_key: "us_contact_address_city", // Target field
@@ -702,10 +796,17 @@ const formFieldMapping = [
 },
 {
     form_key: "us_contact_email_na",
-    label_texts: ["Does Not Apply"],
+    //label_texts: ["Does Not Apply"],
     api_keys: [],
     field_type: "checkbox",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset/div/div[3]/div/div/div[7]/div/div/div[2]/span/span/input" }
+},
+{
+    form_key: "us_contact_email_text",
+    //label_texts: ["Does Not Apply"],
+    api_keys: [],
+    field_type: "checkbox",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[2]/fieldset/div/div[3]/div/div/div[7]/div/div/input[1]" }
 },
 // Add these to your formFieldMapping array in content.js
 
@@ -817,20 +918,41 @@ const formFieldMapping = [
     field_type: "text",
     locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxSpouseGivenName" }
 },
+// Add these to your formFieldMapping array in content.js
+
+// --- Spouse's Place of Birth ---
+// Source field for Spouse's Place of Birth (from API)
+{
+    form_key: "spouse_pob_source",
+    label_texts: ["Spouse's Place of Birth"], // Matches the section header
+    api_keys: ["spouse_pob"], // API provides 'spouse_pob' as "City, Country"
+    field_type: "hidden"     // Indicates this holds data for parsing
+},
+// Target field: Spouse's POB City
 {
     form_key: "spouse_pob_city_text",
-    //label_texts: ["City"], // For Spouse's POB City
-    api_keys: ["spouse_pob"], // Will be filled by parsing spouse_pob_source
+    //label_texts: ["City"], // Label for the city input in Spouse POB section
+    api_keys: [],          // Will be filled by parsing spouse_pob_source
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[1]/div[2]/div/div/div[1]/input" }
 },
+// Target checkbox: Spouse's POB City "Do Not Know"
+{
+    form_key: "spouse_pob_city_unk",
+    //label_texts: ["Do Not Know"], // Associated with Spouse's POB City
+    api_keys: [],               // Logic will handle this based on parsed city
+    field_type: "checkbox",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[1]/div[2]/div/div/div[1]/div/span/span/input" }
+},
+// Target field: Spouse's POB Country/Region
 {
     form_key: "spouse_pob_country_select",
-    label_texts: ["Country/Region"], // For Spouse's POB Country
-    api_keys: ["spouse_pob"], // Will be filled by parsing spouse_pob_source
+    //label_texts: ["Country/Region"], // Label for the country dropdown in Spouse POB section
+    api_keys: [],                  // Will be filled by parsing spouse_pob_source
     field_type: "select",
-    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlSpousePOBCountry" }
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[1]/div[2]/div/div/div[2]/select" }
 },
+// --- End of Spouse's Place of Birth Mappings ---
 {
     form_key: "employer_school_name_text", // Changed form_key
     label_texts: ["Present Employer or School Name"],
@@ -850,7 +972,7 @@ const formFieldMapping = [
     label_texts: ["Briefly describe your duties:"],
     api_keys: ["current_employer_duties"], // From your formData
     field_type: "textarea",
-    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxDescribeDuties" }
+    locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$tbxDescribeDuties"}
 },
 {
     form_key: "mother_dob_source",
@@ -915,6 +1037,17 @@ const formFieldMapping = [
     // !!! CRITICAL: Verify this ID. If spouse has unique DOB fields, update this ID. !!!
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset[1]/div[1]/div[3]/input[2]" }
 },
+// Add this to your formFieldMapping array
+
+// --- Spouse's Address Type ---
+{
+    form_key: "spouse_address_type_select",
+    label_texts: ["Spouse's Address"],
+    api_keys: ["spouse_address"],
+    field_type: "select",
+    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_ddlSpouseAddressType" }
+},
+// --- End of Spouse's Address Type Mapping ---
 {
     form_key: "employment_start_date_source",
     label_texts: ["Start Date"], // Label text from the snippet
@@ -943,58 +1076,52 @@ const formFieldMapping = [
     field_type: "text",
     locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxEmpDateFromYear" }
 },
-
-{
-    form_key: "employer_school_address_source",
-    api_keys: ["current_employer_address"], // From your formData
-    field_type: "hidden" // This will be parsed by a helper function
-},
 // Target fields for parsed employer/school address
 {
     form_key: "employer_school_street1_text",
     //label_texts: ["Street Address (Line 1)"], // Context: Employer/School
-    api_keys: [], // To be filled by parsing 'employer_school_address_source'
+    api_keys: ["present_employer_address_line1"], // To be filled by parsing 'employer_school_address_source'
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[1]/input" }
 },
 {
     form_key: "employer_school_street2_text",
     //label_texts: ["Street Address (Line 2)"], // Context: Employer/School
-    api_keys: [],
+    api_keys: ["present_employer_address_line2"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[2]/input" }
 },
 {
     form_key: "employer_school_city_text",
     //label_texts: ["City"], // Context: Employer/School
-    api_keys: [],
+    api_keys: ["present_employer_address_city"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[3]/input" }
 },
 {
     form_key: "employer_school_state_text",
     //label_texts: ["State/Province"], // Context: Employer/School
-    api_keys: [],
+    api_keys: ["present_employer_address_state"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[4]/input[1]" }
 },
 {
     form_key: "employer_school_state_na_checkbox",
-    label_texts: ["Does Not Apply"], // Context: Employer/School State
+    label_texts: [""], // Context: Employer/School State
     api_keys: [], // Logic will handle this based on parsed state
     field_type: "checkbox",
-    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_cbxWORK_EDUC_ADDR_STATE_NA" }
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[4]/span[3]/span/input" }
 },
 {
     form_key: "employer_school_postal_text",
     //label_texts: ["Postal Zone/ZIP Code"], // Context: Employer/School
-    api_keys: [],
+    api_keys: ["present_employer_address_zip_code"],
     field_type: "text",
-    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_tbxWORK_EDUC_ADDR_POSTAL_CD" }
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[5]/input[1]" }
 },
 {
     form_key: "employer_school_postal_na_checkbox",
-    label_texts: ["Does Not Apply"], // Context: Employer/School Postal
+    //label_texts: ["Does Not Apply"], // Context: Employer/School Postal
     api_keys: [], // Logic will handle this
     field_type: "checkbox",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[5]/span[3]/span/input" }
@@ -1009,7 +1136,7 @@ const formFieldMapping = [
 {
     form_key: "employer_school_phone_text",
     //label_texts: ["Phone Number"], // Context: Employer/School
-    api_keys: ["current_employer_phone"], // ASSUMED API key. Your API needs to provide this, or it needs parsing from address.
+    api_keys: ["present_employer_phone_number"], // ASSUMED API key. Your API needs to provide this, or it needs parsing from address.
                                         // Your formData does not currently show this key.
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/fieldset/div[1]/div[2]/div/div/div[2]/div[6]/input" }
@@ -1017,7 +1144,7 @@ const formFieldMapping = [
 {
     form_key: "previously_employed_radio",
     label_texts: ["Were you previously employed?"],
-    api_keys: ["previous_employment"],
+    api_keys: ["previously_employed"],
     field_type: "radio",
     locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblPreviouslyEmployed" }
 },
@@ -1050,31 +1177,26 @@ const formFieldMapping = [
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/div[1]/input" }
 },
 {
-    form_key: "prev_emp_1_address_source",
-    api_keys: ["prev_emp_1_address"], // API key for the full address string of 1st employer
-    field_type: "hidden"
-},
-{
     form_key: "prev_emp_1_street1_text",
-    api_keys: [], // Filled by parsing prev_emp_1_address_source
+    api_keys: ["prev_emp_1_address_line1"], // Filled by parsing prev_emp_1_address_source
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/div[2]/div[1]/input" }
 },
 {
     form_key: "prev_emp_1_street2_text",
-    api_keys: [],
+    api_keys: ["prev_emp_1_address_line2"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/div[2]/div[2]/input" }
 },
 {
     form_key: "prev_emp_1_city_text",
-    api_keys: [],
+    api_keys: ["prev_emp_1_address_city"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/div[2]/div[3]/input" }
 },
 {
     form_key: "prev_emp_1_state_text",
-    api_keys: [],
+    api_keys: ["prev_emp_1_address_state"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/div[2]/div[4]/div/input" }
 },
@@ -1086,7 +1208,7 @@ const formFieldMapping = [
 },
 {
     form_key: "prev_emp_1_postal_text",
-    api_keys: [],
+    api_keys: ["prev_emp_1_address_zip_code"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/div[2]/div[5]/div/input" }
 },
@@ -1113,6 +1235,18 @@ const formFieldMapping = [
     api_keys: ["prev_emp_1_job_title"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/input[1]" }
+},
+{
+    form_key: "prev_emp_1_supervisor_surname_text",
+    api_keys: ["prev_emp_1_supervisor_surname"],
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/input[2]" }
+},
+{
+    form_key: "prev_emp_1_supervisor_given_name_text",
+    api_keys: ["prev_emp_1_supervisor_given_name"],
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[1]/fieldset/div/div[2]/div[2]/table/tbody/tr/td/div[1]/input[4]" }
 },
 {
     form_key: "prev_emp_1_supervisor_surname_unk",
@@ -1177,13 +1311,6 @@ const formFieldMapping = [
     field_type: "radio",
     locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblOtherEduc" }
 },
-// Mappings for the FIRST Educational Institution (dtlPrevEduc_ctl00_...)
-
-{
-    form_key: "education_1_address_source",
-    api_keys: ["institution_address"],
-    field_type: "hidden"
-},
 // Target fields for FIRST Educational Institution
 {
     form_key: "education_1_name_text",
@@ -1193,25 +1320,25 @@ const formFieldMapping = [
 },
 {
     form_key: "education_1_street1_text",
-    api_keys: [], // Parsed from education_institute_address
+    api_keys: ["institution_address_line1"], // Parsed from education_institute_address
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[2]/fieldset/div[1]/div/div[2]/div[2]/table/tbody/tr/td/div[1]/span/input[2]" }
 },
 {
     form_key: "education_1_street2_text",
-    api_keys: [],
+    api_keys: ["institution_address_line2"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[2]/fieldset/div[1]/div/div[2]/div[2]/table/tbody/tr/td/div[1]/span/input[3]" }
 },
 {
     form_key: "education_1_city_text",
-    api_keys: [],
+    api_keys: ["institution_address_city"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[2]/fieldset/div[1]/div/div[2]/div[2]/table/tbody/tr/td/div[1]/span/input[4]" }
 },
 {
     form_key: "education_1_state_text",
-    api_keys: [],
+    api_keys: ["institution_address_state"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[2]/fieldset/div[1]/div/div[2]/div[2]/table/tbody/tr/td/div[1]/span/div[1]/div/input" }
 },
@@ -1223,7 +1350,7 @@ const formFieldMapping = [
 },
 {
     form_key: "education_1_postal_text",
-    api_keys: [],
+    api_keys: ["institution_address_zip_code"],
     field_type: "text",
     locator: { type: "xpath", value: "/html/body/form/div[3]/div[5]/div/table/tbody/tr/td/div[3]/div[2]/fieldset/div[1]/div/div[2]/div[2]/table/tbody/tr/td/div[1]/span/div[2]/div/input" }
 },
@@ -1545,7 +1672,7 @@ const formFieldMapping = [
     label_texts: ["Have you ever sought to obtain or assist others to obtain a visa, entry into the United States, or any other United States immigration benefit by fraud or willful misrepresentation or other unlawful means?"],
     api_keys: [""], // ASSUMED API key
     field_type: "radio",
-    locator: { type: "id", value: "ctl00_SiteContentPlaceHolder_FormView1_lblIMMGRATN_FRAUD_IND" }
+    locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblImmigrationFraud" }
 },
 // Add these to your formFieldMapping array in content.js
 
@@ -1580,10 +1707,10 @@ const formFieldMapping = [
 ];
 
 const hardcodedValues = {
-    "country_of_birth": "IND",
+    "home_address_country": "IND",
+    "current_nationality" : "INDIA",
     "full_name_native_na": true,
     // "sex": "MALE", // Commented out - let dynamic data fill if available
-    // "place_of_issue": "NEW DELHI", // Commented out - let dynamic data fill if available
     "permanent_resident_other_country": "N",
     "other_names_used": "N",
     "has_telecode": "N",
@@ -1591,7 +1718,7 @@ const hardcodedValues = {
     "tax_id_na": true,
     "purpose_of_trip": "B",
     "purpose_specify": "B1-B2", // **VERIFY THIS VALUE ON THE LIVE FORM**
-    "pob_state_na": true, // Force "Does Not Apply" for Place of Birth State
+    //"pob_state_na": true, // Force "Does Not Apply" for Place of Birth State
     "specific_travel_plans": "N", // Hardcode "Specific travel plans?" to No
     "traveling_as_organization": "N",
     "work_phone_na": true,
@@ -1601,7 +1728,7 @@ const hardcodedValues = {
     "passport_document_type": "R",
     "passport_book_number_na": true,
     "us_contact_org_na" : true,
-    "us_contact_email_na": true,
+    //"us_contact_email_na": true,
     "prev_emp_1_supervisor_surname_unk": true,
     "prev_emp_1_supervisor_given_name_unk": true,
     "specialized_skills_radio": "N",
@@ -1639,9 +1766,7 @@ const hardcodedValues = {
 
 // --- Helper Functions ---
 
-/**
- * Finds the corresponding DOM element(s) for a given mapping.
- */
+
 function findElement(mapping) {
     let element = null;
     const { form_key, label_texts, locator, field_type } = mapping;
@@ -1753,43 +1878,224 @@ function fillElement(elementOrList, field_type, valueToFill, form_key, dataType)
     try {
         switch (field_type) {
             case 'text':
-            case 'textarea':
+                case 'textarea':
                 const textElement = elementOrList;
                 // Check if it's a valid input/textarea element before accessing properties
                 if (textElement && (textElement.tagName === 'INPUT' || textElement.tagName === 'TEXTAREA') && textElement.type !== 'radio' && textElement.type !== 'checkbox') {
-                    const stringValue = String(valueToFill);
-                    if (textElement.value !== stringValue) {
-                        textElement.value = stringValue;
-                        console.log(`Set ${dataType} ${field_type} "${form_key}" to: "${stringValue}".`);
-                        filled = true;
-                        textElement.dispatchEvent(new Event('input', { bubbles: true }));
-                        textElement.dispatchEvent(new Event('change', { bubbles: true }));
-                    } else { filled = true; /* Already correct */ }
-                } else { console.warn(`Cannot fill ${dataType} ${field_type} "${form_key}": Element invalid or null.`); }
+                    
+                    let observer = null; // Declare observer outside
+
+                    try {
+                        // 1. Ensure the element is not disabled or readonly before filling
+                        if (textElement.disabled) {
+                            console.log(`Element "${form_key}" was disabled. Attempting to enable it.`);
+                            textElement.disabled = false;
+                        }
+                        if (textElement.readOnly) {
+                            console.log(`Element "${form_key}" was readOnly. Attempting to make it writable.`);
+                            textElement.readOnly = false;
+                        }
+
+                        // Setup a MutationObserver to fight against re-disabling or being made readOnly
+                        observer = new MutationObserver((mutationsList, obs) => {
+                            for (const mutation of mutationsList) {
+                                if (mutation.type === 'attributes') {
+                                    if (mutation.attributeName === 'disabled' && textElement.disabled) {
+                                        console.warn(`[Observer] Element "${form_key}" was disabled by page script. Forcing re-enable.`);
+                                        // Use queueMicrotask to attempt re-enabling after current synchronous operations
+                                        queueMicrotask(() => {
+                                            if (textElement.disabled) { // Check again, page might be very fast
+                                                textElement.disabled = false;
+                                                // Re-dispatch events as the page might need them while element is enabled
+                                                // to correctly update its internal state or dependent UI.
+                                                textElement.dispatchEvent(new Event('input', { bubbles: true }));
+                                                textElement.dispatchEvent(new Event('change', { bubbles: true }));
+                                                console.log(`[Observer] Re-enabled and re-dispatched events for "${form_key}" after being disabled.`);
+                                            }
+                                        });
+                                    }
+                                    if (mutation.attributeName === 'readonly' && textElement.readOnly) {
+                                        console.warn(`[Observer] Element "${form_key}" was set to readOnly by page script. Forcing writable.`);
+                                        queueMicrotask(() => {
+                                            if (textElement.readOnly) { // Check again
+                                                textElement.readOnly = false;
+                                                textElement.dispatchEvent(new Event('input', { bubbles: true }));
+                                                textElement.dispatchEvent(new Event('change', { bubbles: true }));
+                                                console.log(`[Observer] Made writable and re-dispatched events for "${form_key}" after being readOnly.`);
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
+                        // Start observing attributes before we make changes that might trigger page scripts
+                        observer.observe(textElement, { attributes: true });
+
+                        const stringValue = String(valueToFill);
+                        if (textElement.value !== stringValue) {
+                            // Ensure it's enabled right before setting value
+                            if (textElement.disabled) textElement.disabled = false;
+                            if (textElement.readOnly) textElement.readOnly = false;
+
+                            textElement.value = stringValue;
+                            console.log(`Set ${dataType} ${field_type} "${form_key}" to: "${stringValue}".`);
+                            filled = true;
+
+                            // Dispatch a sequence of events
+                            textElement.dispatchEvent(new Event('focus', { bubbles: true }));
+                            textElement.dispatchEvent(new Event('input', { bubbles: true }));
+                            
+                            if (textElement.hasAttribute('onkeyup')) {
+                                textElement.dispatchEvent(new Event('keyup', { bubbles: true }));
+                                console.log(`Dispatched 'keyup' for "${form_key}"`);
+                            }
+                            
+                            textElement.dispatchEvent(new Event('change', { bubbles: true }));
+
+                            if (typeof window.setDirty === 'function') {
+                                try {
+                                    window.setDirty();
+                                    console.log(`Called window.setDirty() for ${form_key}`);
+                                } catch (e) {
+                                    console.warn(`Error calling window.setDirty() for ${form_key}:`, e);
+                                }
+                            } else if (textElement.getAttribute('onchange')?.includes('setDirty()')) {
+                                 console.warn(`window.setDirty function not found for ${form_key}, but was in onchange.`);
+                            }
+                            
+                            textElement.dispatchEvent(new Event('blur', { bubbles: true }));
+
+                        } else {
+                            filled = true; // Already correct
+                            console.log(`${dataType} ${field_type} "${form_key}" already had correct value.`);
+                        }
+
+                        // 2. Ensure the element is enabled and not readOnly AFTER filling and events
+                        // This is an immediate check. The observer handles subsequent changes.
+                        if (textElement.disabled) {
+                            console.log(`Element "${form_key}" was disabled immediately after filling/events (before observer disconnect). Forcing enable.`);
+                            textElement.disabled = false;
+                        }
+                        if (textElement.readOnly) {
+                            console.log(`Element "${form_key}" was readOnly immediately after filling/events (before observer disconnect). Forcing writable.`);
+                            textElement.readOnly = false;
+                        }
+
+                    } finally {
+                        // IMPORTANT: Disconnect the observer once we're done with our primary interaction.
+                        if (observer) {
+                            observer.disconnect();
+                            console.log(`[Observer] Disconnected for "${form_key}".`);
+                        }
+
+                        // Final attempt to ensure the element is enabled/writable after a very short delay.
+                        // This can help if page scripts run slightly after our main logic.
+                        setTimeout(() => {
+                            if (textElement.disabled) {
+                                console.warn(`Element "${form_key}" found disabled after observer disconnect and delay. Forcing enable (final attempt).`);
+                                textElement.disabled = false;
+                            }
+                            if (textElement.readOnly) {
+                                console.warn(`Element "${form_key}" found readOnly after observer disconnect and delay. Forcing writable (final attempt).`);
+                                textElement.readOnly = false;
+                            }
+
+                            // If still disabled after all this, log a more prominent warning.
+                            if (textElement.disabled || textElement.readOnly) {
+                                 console.error(`CRITICAL: Element "${form_key}" could not be reliably kept enabled/writable. Page interaction might be blocked.`);
+                            } else {
+                                console.log(`Element "${form_key}" is enabled and writable after all operations.`);
+                            }
+                        }, 100); // 100ms delay, can be adjusted
+                    }
+
+                } else {
+                    console.warn(`Cannot fill ${dataType} ${field_type} "${form_key}": Element invalid or null.`);
+                }
                 break;
 
-            case 'select':
-                const selectElement = elementOrList;
-                if (selectElement?.tagName === 'SELECT') {
-                    let optionFound = false;
-                    const normalizedValue = String(valueToFill).trim().toLowerCase();
-                    for (const option of selectElement.options) {
-                        const normVal = option.value.trim().toLowerCase();
-                        const normText = option.text.trim().toLowerCase();
-                        // Match value OR text
-                        if (normVal === normalizedValue || normText === normalizedValue) {
-                            if (!option.selected) {
-                                option.selected = true;
-                                console.log(`Selected option "${option.value}" for ${dataType} select "${form_key}" (matched "${valueToFill}").`);
-                                filled = true;
-                                selectElement.dispatchEvent(new Event('change', { bubbles: true }));
-                            } else { filled = true; /* Already correct */ }
-                            optionFound = true; break;
+                case 'select':
+                    const selectElement = elementOrList;
+                    if (selectElement?.tagName === 'SELECT') {
+                        let optionFound = false;
+                        const normalizedValue = String(valueToFill).trim().toLowerCase();
+                        // let originalSelectedIndex = selectElement.selectedIndex; // Not strictly needed for this logic
+    
+                        for (const option of selectElement.options) {
+                            const normVal = option.value.trim().toLowerCase();
+                            const normText = option.text.trim().toLowerCase();
+                            
+                            // Match value OR text
+                            if (normVal === normalizedValue || normText === normalizedValue) {
+                                if (selectElement.value !== option.value) { // Check if change is needed
+                                    selectElement.value = option.value; // Set the value directly
+                                    console.log(`Set ${dataType} select "${form_key}" to value: "${option.value}" (matched "${valueToFill}").`);
+                                    filled = true;
+    
+                                    // Standard event dispatching - still good practice
+                                    selectElement.dispatchEvent(new Event('focus', { bubbles: true }));
+                                    selectElement.dispatchEvent(new Event('input', { bubbles: true })); // For frameworks that listen to input
+                                    selectElement.dispatchEvent(new Event('change', { bubbles: true })); // Standard change event
+                                    selectElement.dispatchEvent(new Event('blur', { bubbles: true }));
+    
+                                    // Attempt to directly call functions from the onchange attribute
+                                    // This is specific to pages with such inline handlers, like ASP.NET __doPostBack
+    
+                                    // 1. Call setDirty() if it exists
+                                    if (typeof window.setDirty === 'function') {
+                                        try {
+                                            window.setDirty();
+                                            console.log(`Called window.setDirty() for ${form_key}`);
+                                        } catch (e) {
+                                            console.warn(`Error calling window.setDirty() for ${form_key}:`, e);
+                                        }
+                                    } else {
+                                        console.warn(`window.setDirty function not found for ${form_key}.`);
+                                    }
+    
+                                    // 2. Schedule __doPostBack if it exists
+                                    // The target for __doPostBack is often the 'name' attribute of the control.
+                                    // The onchange attribute provided was:
+                                    // onchange="javascript:setDirty();setTimeout('__doPostBack(\'ctl00$SiteContentPlaceHolder$FormView1$dlPrincipalAppTravel$ctl00$ddlPurposeOfTrip\',\'\')', 0)"
+                                    // The 'name' attribute of the select element is 'ctl00$SiteContentPlaceHolder$FormView1$dlPrincipalAppTravel$ctl00$ddlPurposeOfTrip'
+                                    
+                                    const postBackTarget = selectElement.name; // Use the 'name' attribute as it matches the __doPostBack target
+                                    const postBackArgument = '';
+    
+                                    if (typeof window.__doPostBack === 'function') {
+                                        if (postBackTarget) {
+                                            console.log(`Scheduling __doPostBack for target: '${postBackTarget}' with argument: '${postBackArgument}' for ${form_key}`);
+                                            setTimeout(() => {
+                                                try {
+                                                    window.__doPostBack(postBackTarget, postBackArgument);
+                                                    console.log(`Called __doPostBack via setTimeout for ${form_key} using target '${postBackTarget}'`);
+                                                } catch (e) {
+                                                    console.warn(`Error calling __doPostBack via setTimeout for ${form_key}:`, e);
+                                                }
+                                            }, 0); // setTimeout with 0 delay to mimic the original handler
+                                        } else {
+                                            console.warn(`Cannot call __doPostBack: selectElement.name is empty for ${form_key}.`);
+                                        }
+                                    } else {
+                                        console.warn(`window.__doPostBack function not found for ${form_key}. Postback might not occur.`);
+                                    }
+    
+                                } else {
+                                    filled = true; // Already correct
+                                    console.log(`Select "${form_key}" already had correct value: "${option.value}".`);
+                                }
+                                optionFound = true;
+                                break;
+                            }
                         }
+                        if (!optionFound) {
+                            console.warn(`Could not find option matching "${normalizedValue}" for ${dataType} select "${form_key}".`);
+                        }
+                    } else {
+                        console.warn(`Cannot fill ${dataType} select "${form_key}": Element invalid or null.`);
                     }
-                    if (!optionFound) console.warn(`Could not find option matching "${normalizedValue}" for ${dataType} select "${form_key}".`);
-                } else { console.warn(`Cannot fill ${dataType} select "${form_key}": Element invalid or null.`); }
-                break;
+                    break;
 
                 case 'checkbox':
                     const checkboxElement = elementOrList;
@@ -1815,27 +2121,93 @@ function fillElement(elementOrList, field_type, valueToFill, form_key, dataType)
                     } else { console.warn(`Cannot fill ${dataType} checkbox "${form_key}": Element invalid or null.`); }
                     break;
 
-            case 'radio':
-                const radioButtons = elementOrList;
-                if (radioButtons instanceof NodeList && radioButtons.length > 0) {
-                    let radioSelected = false;
-                    const stringValue = String(valueToFill);
-                    for (const radio of radioButtons) {
-                        if (radio.tagName === 'INPUT' && radio.type === 'radio' && radio.value === stringValue) {
-                            if (!radio.checked) {
-                                radio.checked = true;
-                                radioSelected = true;
-                                console.log(`Selected ${dataType} radio "${radio.value}" for group "${form_key}".`);
-                                filled = true;
-                                radio.dispatchEvent(new Event('click', { bubbles: true }));
-                                radio.dispatchEvent(new Event('change', { bubbles: true }));
-                            } else { radioSelected = true; filled = true; /* Already correct */ }
-                            break;
+                    case 'radio':
+                        const radioButtons = elementOrList; // This is a NodeList
+                        if (radioButtons instanceof NodeList && radioButtons.length > 0) {
+                            let radioSelected = false;
+                            const stringValueToFill = String(valueToFill);
+                            
+                            for (const radio of radioButtons) {
+                                if (radio.tagName === 'INPUT' && radio.type === 'radio' && radio.value === stringValueToFill) {
+                                    let radioObserver = null;
+                                    try {
+                                        // 1. Ensure the specific radio button is not disabled before checking/changing
+                                        if (radio.disabled) {
+                                            console.log(`Radio button value "${radio.value}" for group "${form_key}" was disabled. Attempting to enable.`);
+                                            radio.disabled = false;
+                                        }
+        
+                                        // Setup a MutationObserver for this specific radio button
+                                        radioObserver = new MutationObserver((mutationsList, obs) => {
+                                            for (const mutation of mutationsList) {
+                                                if (mutation.type === 'attributes' && mutation.attributeName === 'disabled' && radio.disabled) {
+                                                    console.warn(`[Observer] Radio button value "${radio.value}" for "${form_key}" was disabled by page script. Forcing re-enable.`);
+                                                    queueMicrotask(() => {
+                                                        if (radio.disabled) { // Check again
+                                                            radio.disabled = false;
+                                                            // Re-dispatch click/change if needed, though for radios,
+                                                            // ensuring 'checked' and 'enabled' is often key.
+                                                            // radio.dispatchEvent(new Event('change', { bubbles: true }));
+                                                            console.log(`[Observer] Re-enabled radio value "${radio.value}" for "${form_key}".`);
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                        radioObserver.observe(radio, { attributes: true });
+        
+                                        if (!radio.checked) {
+                                            // Ensure enabled right before checking
+                                            if (radio.disabled) radio.disabled = false;
+        
+                                            radio.checked = true;
+                                            radioSelected = true;
+                                            filled = true; // Mark as filled for the group
+                                            console.log(`Selected ${dataType} radio "${radio.value}" for group "${form_key}".`);
+        
+                                            // Dispatch events - click is often most important for radios
+                                            radio.dispatchEvent(new Event('focus', { bubbles: true }));
+                                            radio.dispatchEvent(new Event('click', { bubbles: true })); // Triggers change implicitly
+                                            radio.dispatchEvent(new Event('change', { bubbles: true }));
+                                            radio.dispatchEvent(new Event('blur', { bubbles: true }));
+                                        } else {
+                                            radioSelected = true; // Already correct
+                                            filled = true;
+                                            console.log(`Radio "${radio.value}" for group "${form_key}" was already checked.`);
+                                        }
+        
+                                        // Ensure it's enabled after interaction
+                                        if (radio.disabled) {
+                                            console.log(`Radio value "${radio.value}" for "${form_key}" was disabled after interaction. Forcing enable.`);
+                                            radio.disabled = false;
+                                        }
+        
+                                    } finally {
+                                        if (radioObserver) {
+                                            radioObserver.disconnect();
+                                            console.log(`[Observer] Disconnected for radio value "${radio.value}" in group "${form_key}".`);
+                                        }
+                                        // Final check for this specific radio after observer disconnect
+                                        setTimeout(() => {
+                                            if (radio.checked && radio.disabled) { // Only care if it's the one we checked
+                                                console.warn(`Radio value "${radio.value}" for "${form_key}" found disabled after observer disconnect and delay. Forcing enable (final attempt).`);
+                                                radio.disabled = false;
+                                                if (radio.disabled) {
+                                                    console.error(`CRITICAL: Radio value "${radio.value}" for "${form_key}" could not be kept enabled.`);
+                                                }
+                                            }
+                                        }, 100);
+                                    }
+                                    break; // Found and processed the target radio, exit loop
+                                }
+                            }
+                            if (!radioSelected) {
+                                console.warn(`Could not find ${dataType} radio with value "${stringValueToFill}" for group "${form_key}".`);
+                            }
+                        } else {
+                            console.warn(`Cannot fill ${dataType} radio group "${form_key}": Invalid/empty element list or not a NodeList.`);
                         }
-                    }
-                    if (!radioSelected) console.warn(`Could not find ${dataType} radio with value "${stringValue}" for group "${form_key}".`);
-                } else { console.warn(`Cannot fill ${dataType} radio group "${form_key}": Invalid/empty element list.`); }
-                break;
+                        break;
 
             default:
                 console.warn(`Unsupported field type "${field_type}" for key "${form_key}" in fillElement.`);
@@ -1849,151 +2221,173 @@ function fillElement(elementOrList, field_type, valueToFill, form_key, dataType)
 
 // Place this with your other helper functions in content.js
 
-// Add this function to your "Helper Functions" section in content.js
+/**
+ * Determines the correct value for the US Point of Contact relationship dropdown
+ * based on the input string, with specific fallbacks.
+ * @param {string} relationshipString - The relationship description from the API.
+ * @returns {string} The value attribute of the option to be selected (e.g., "R", "S", "O", or "").
+ */
+function determineUSContactRelationshipValue(relationshipString) {
+    if (!relationshipString || typeof relationshipString !== 'string' || relationshipString.trim() === "") {
+        return ""; // Default to "- SELECT ONE -" if no string
+    }
+    const upperStr = relationshipString.toUpperCase().trim();
 
-// Ensure this function definition is in your "Helper Functions" section,
-// BEFORE fillForm or any code that calls it.
+    // Define direct text-to-value mappings based on the dropdown's visible text
+    const directTextMappings = {
+        "RELATIVE": "R",
+        "SPOUSE": "S",
+        "FRIEND": "C",
+        "BUSINESS ASSOCIATE": "B",
+        "EMPLOYER": "P",
+        "SCHOOL OFFICIAL": "H",
+        "OTHER": "O"
+    };
+
+    if (directTextMappings[upperStr]) {
+        return directTextMappings[upperStr];
+    }
+
+    // Keyword-based fallback logic as requested
+    if (upperStr.includes("SISTER") ||
+        upperStr.includes("BROTHER") ||
+        upperStr.includes("MOTHER") ||
+        upperStr.includes("FATHER") ||
+        upperStr.includes("AUNT") ||
+        upperStr.includes("UNCLE") ||
+        upperStr.includes("COUSIN") ||
+        upperStr.includes("NIECE") ||
+        upperStr.includes("NEPHEW") ||
+        upperStr.includes("GRANDMOTHER") ||
+        upperStr.includes("GRANDFATHER") ||
+        upperStr.includes("DAUGHTER") || // Catches "daughter-in-law"
+        upperStr.includes("SON") ||      // Catches "son-in-law"
+        upperStr.includes("RELATIVE")) { // General catch-all
+        console.log(`  [US Contact Relationship] Matched keyword for RELATIVE in "${relationshipString}"`);
+        return "R"; // Value for RELATIVE
+    }
+
+    // Check for "OTHER" as a keyword if no relative term matched
+    if (upperStr.includes("OTHER")) {
+        console.log(`  [US Contact Relationship] Matched keyword for OTHER in "${relationshipString}"`);
+        return "O"; // Value for OTHER
+    }
+
+    // If no direct match or keyword match, default to "OTHER" or ""
+    // Let's default to "OTHER" as a final fallback as requested.
+    console.warn(`[US Contact Relationship] No specific match for "${relationshipString}". Defaulting to OTHER.`);
+    return "O";
+}
 
 /**
- * Fills the details for the FIRST educational institution using direct API keys for name
- * and a combined address string. Handles parsing for address components.
- * @param {object} formData - The data object from the API.
- * @param {object} mappedElements - Object containing the mapped DOM elements for the form.
+ * Fills the US Point of Contact "Relationship to You" dropdown.
+ * Uses specific logic to map API string to dropdown options, including fallbacks.
+ * @param {string} relationshipApiString - The raw relationship string from formData.us_contact_relationship.
+ * @param {object} mappedElements - Object containing the mapped DOM elements.
  */
-function fillEducationalInstitution_1_Details(formData, mappedElements) {
-    const institutionPrefix = "education_1"; // Specific for the first institution
-    console.log(`[${institutionPrefix} Info] Attempting to fill educational institution details.`);
-    let filledSomethingOverall = false;
+function parseAndFillUSContactRelationship(relationshipApiString, mappedElements) {
+    const dropdownKey = "us_contact_relationship_select"; // Matches form_key in mapping
+    const dropdownElement = mappedElements[dropdownKey];
 
-    // 1. Fill Institution Name
-    const nameMapping = formFieldMapping.find(m => m.form_key === `${institutionPrefix}_name_text`);
-    const institutionName = nameMapping ? findValueFromApiKeys(formData, nameMapping.api_keys) : undefined;
-    const nameElement = mappedElements[`${institutionPrefix}_name_text`];
+    if (!dropdownElement) {
+        console.warn(`[US Contact Relationship] Dropdown element for key "${dropdownKey}" not found.`);
+        return false;
+    }
 
-    if (nameElement) {
-        if (institutionName !== undefined && institutionName !== null && String(institutionName).trim() !== "") {
-            console.log(`  [${institutionPrefix}] Filling Name: "${institutionName}"`);
-            if (fillElement(nameElement, 'text', institutionName, `${institutionPrefix}_name_text`, 'dynamic')) {
-                filledSomethingOverall = true;
+    const valueToSelect = determineUSContactRelationshipValue(relationshipApiString);
+    console.log(`[US Contact Relationship] Input from API: "${relationshipApiString}", Determined value to select in dropdown: "${valueToSelect}"`);
+
+    if (fillElement(dropdownElement, 'select', valueToSelect, dropdownKey, 'dynamic')) {
+        console.log(`  [US Contact Relationship] Successfully selected "${valueToSelect}".`);
+        return true;
+    } else {
+        console.warn(`  [US Contact Relationship] Failed to select value "${valueToSelect}" for input "${relationshipApiString}". Attempting default.`);
+        // If specific selection failed, try selecting the default "- SELECT ONE -"
+        fillElement(dropdownElement, 'select', "", dropdownKey, 'logic_default');
+        return false;
+    }
+}
+
+// Place this with your other helper functions in content.js
+
+/**
+ * Parses the spouse's place of birth string (e.g., "City, Country")
+ * and fills the city input, country dropdown, and handles the city's "Do Not Know" checkbox.
+ * @param {string} pobString - The spouse's POB string from API (e.g., formData.spouse_pob).
+ * @param {object} mappedElements - Object containing mapped DOM elements.
+ */
+function parseAndFillSpousePOB(pobString, mappedElements) {
+    console.log(`[Spouse POB] Attempting to parse: "${pobString}"`);
+    let filledSomething = false;
+
+    // Define the form_keys for the elements we'll be working with
+    const cityFieldKey = "spouse_pob_city_text";
+    const cityUnkCheckboxKey = "spouse_pob_city_unk";
+    const countryDropdownKey = "spouse_pob_country_select";
+
+    const cityElement = mappedElements[cityFieldKey];
+    const cityUnkElement = mappedElements[cityUnkCheckboxKey];
+    const countryElement = mappedElements[countryDropdownKey];
+
+    let parsedCity = "";
+    let parsedCountry = "";
+
+    if (pobString && typeof pobString === 'string' && pobString.trim() !== "" && pobString.toLowerCase() !== "unknown") {
+        const parts = pobString.split(',').map(p => p.trim());
+        if (parts.length > 0) {
+            parsedCity = parts[0]; // Assume first part is city
+        }
+        if (parts.length > 1) {
+            parsedCountry = parts.slice(1).join(', ').trim(); // Rest is country
+        }
+        console.log(`  [Spouse POB] Parsed: City="${parsedCity}", Country="${parsedCountry}"`);
+    } else {
+        console.log(`  [Spouse POB] POB string is empty, null, or "unknown".`);
+    }
+
+    // Fill City and handle its "Do Not Know" checkbox
+    if (cityElement) {
+        if (parsedCity) {
+            if (fillElement(cityElement, 'text', parsedCity, cityFieldKey, 'dynamic')) {
+                filledSomething = true;
             }
-        } else {
-            console.log(`  [${institutionPrefix}] No institution name from API. Clearing field.`);
-            fillElement(nameElement, 'text', '', `${institutionPrefix}_name_text`, 'logic_clear');
+            if (cityUnkElement) { // If city is filled, uncheck "Do Not Know"
+                fillElement(cityUnkElement, 'checkbox', false, cityUnkCheckboxKey, 'logic');
+            }
+        } else { // No city parsed or provided
+            fillElement(cityElement, 'text', '', cityFieldKey, 'logic_clear'); // Clear the city field
+            if (cityUnkElement) { // Check "Do Not Know"
+                fillElement(cityUnkElement, 'checkbox', true, cityUnkCheckboxKey, 'logic_set_na');
+            }
         }
     } else {
-        console.warn(`  [${institutionPrefix}] Element for "${institutionPrefix}_name_text" not found.`);
+        console.warn(`  [Spouse POB] City element for key "${cityFieldKey}" not found.`);
     }
 
-    // 2. Parse and Fill Institution Address
-    const addressSourceMapping = formFieldMapping.find(m => m.form_key === `${institutionPrefix}_address_source`); // Assuming you still have this for the address string
-    const fullAddressString = addressSourceMapping ? findValueFromApiKeys(formData, addressSourceMapping.api_keys) : undefined;
-
-    // Define keys for this institution's address components using the institutionPrefix
-    const street1Key = `${institutionPrefix}_street1_text`;
-    const street2Key = `${institutionPrefix}_street2_text`;
-    const cityKey = `${institutionPrefix}_city_text`;
-    const stateTextKey = `${institutionPrefix}_state_text`;
-    const stateNaKey = `${institutionPrefix}_state_na_checkbox`;
-    const postalTextKey = `${institutionPrefix}_postal_text`;
-    const postalNaKey = `${institutionPrefix}_postal_na_checkbox`;
-    const countryKey = `${institutionPrefix}_country_select`;
-
-    if (!fullAddressString || typeof fullAddressString !== 'string' || fullAddressString.trim() === "") {
-        console.warn(`[${institutionPrefix} Address] Address string is empty or invalid. Clearing fields & setting NAs.`);
-        if (mappedElements[street1Key]) fillElement(mappedElements[street1Key], 'text', '', street1Key, 'logic_clear');
-        if (mappedElements[street2Key]) fillElement(mappedElements[street2Key], 'text', '', street2Key, 'logic_clear');
-        if (mappedElements[cityKey]) fillElement(mappedElements[cityKey], 'text', '', cityKey, 'logic_clear');
-        if (mappedElements[stateTextKey]) fillElement(mappedElements[stateTextKey], 'text', '', stateTextKey, 'logic_clear');
-        if (mappedElements[stateNaKey]) fillElement(mappedElements[stateNaKey], 'checkbox', true, stateNaKey, 'logic_set_na');
-        if (mappedElements[postalTextKey]) fillElement(mappedElements[postalTextKey], 'text', '', postalTextKey, 'logic_clear');
-        if (mappedElements[postalNaKey]) fillElement(mappedElements[postalNaKey], 'checkbox', true, postalNaKey, 'logic_set_na');
-        const countryEl = mappedElements[countryKey];
-        if (countryEl && countryEl.options?.length > 0) countryEl.selectedIndex = 0;
-        return filledSomethingOverall; // Return based on whether name was filled
-    }
-
-    console.log(`  [${institutionPrefix} Address] Parsing: "${fullAddressString}"`);
-    let addressParts = { street1: '', street2: '', city: '', state: '', postalCode: '', country: 'IND' }; // Default country
-    let remainingAddress = fullAddressString.trim();
-
-    // Simplified Address Parsing Logic (adapt as needed, especially for international addresses)
-    const pinRegex = /\b(\d{6})\s*$/; // Indian PIN
-    let match = remainingAddress.match(pinRegex);
-    if (match) {
-        addressParts.postalCode = match[1];
-        remainingAddress = remainingAddress.substring(0, match.index).trim().replace(/,$/, '').trim();
-    }
-
-    const addressComponents = remainingAddress.split(',').map(s => s.trim()).filter(s => s);
-    if (addressComponents.length > 0) {
-        if (addressComponents.length > 1) {
-            const potentialState = addressComponents.pop();
-            if (potentialState.length > 2) addressParts.state = potentialState; else addrParts.push(potentialState);
+    // Fill Country dropdown
+    if (countryElement) {
+        if (parsedCountry) {
+            // fillElement for select should try to match by text (parsedCountry) or value (country code)
+            if (fillElement(countryElement, 'select', parsedCountry, countryDropdownKey, 'dynamic')) {
+                filledSomething = true;
+                console.log(`  [Spouse POB] Selected country: "${parsedCountry}"`);
+            } else {
+                console.warn(`  [Spouse POB] Could not select country "${parsedCountry}" in dropdown "${countryDropdownKey}". Check if name/code exists.`);
+                // If matching failed, reset to default "Select One" if that's desired.
+                if (countryElement.options.length > 0) countryElement.selectedIndex = 0;
+            }
+        } else { // No country parsed, reset dropdown
+            console.log(`  [Spouse POB] No country parsed. Resetting country dropdown.`);
+            if (countryElement.options.length > 0) countryElement.selectedIndex = 0;
         }
-        if (addressComponents.length > 0) addressParts.city = addressComponents.pop();
-        addressParts.street1 = addressComponents.join(', ').trim();
-    } else if (remainingAddress) {
-        addressParts.street1 = remainingAddress;
+    } else {
+        console.warn(`  [Spouse POB] Country dropdown element for key "${countryDropdownKey}" not found.`);
     }
 
-    if (addressParts.street1 && addressParts.street1.length > 40) {
-        let splitPoint = addressParts.street1.substring(0, 40).lastIndexOf(' ');
-        if (splitPoint === -1 || splitPoint < 10) splitPoint = 40;
-        addressParts.street2 = addressParts.street1.substring(splitPoint).trim();
-        addressParts.street1 = addressParts.street1.substring(0, splitPoint).trim();
-    }
-    console.log(`  [${institutionPrefix} Addr] Parsed Parts: `, addressParts);
-
-    // Fill address elements
-    if (mappedElements[street1Key] && addressParts.street1) {
-        if(fillElement(mappedElements[street1Key], 'text', addressParts.street1, street1Key, 'dynamic')) filledSomethingOverall = true;
-    }
-    if (mappedElements[street2Key]) {
-        if(fillElement(mappedElements[street2Key], 'text', addressParts.street2 || '', street2Key, 'dynamic')) filledSomethingOverall = true;
-    }
-    if (mappedElements[cityKey] && addressParts.city) {
-        if(fillElement(mappedElements[cityKey], 'text', addressParts.city, cityKey, 'dynamic')) filledSomethingOverall = true;
-    }
-
-    const stateElement = mappedElements[stateTextKey];
-    const stateNaElement = mappedElements[stateNaKey];
-    if (stateElement) {
-        if (addressParts.state) {
-            if(fillElement(stateElement, 'text', addressParts.state, stateTextKey, 'dynamic')) filledSomethingOverall = true;
-            if (stateNaElement) fillElement(stateNaElement, 'checkbox', false, stateNaKey, 'logic');
-        } else if (stateNaElement) {
-            fillElement(stateElement, 'text', '', stateTextKey, 'logic_clear');
-            fillElement(stateNaElement, 'checkbox', true, stateNaKey, 'logic_set_na');
-        }
-    } else if (stateNaElement){
-        fillElement(stateNaElement, 'checkbox', true, stateNaKey, 'logic_set_na_no_text_field');
-    }
-
-    const postalElement = mappedElements[postalTextKey];
-    const postalNaElement = mappedElements[postalNaKey];
-    if (postalElement) {
-        if (addressParts.postalCode) {
-            if(fillElement(postalElement, 'text', addressParts.postalCode, postalTextKey, 'dynamic')) filledSomethingOverall = true;
-            if (postalNaElement) fillElement(postalNaElement, 'checkbox', false, postalNaKey, 'logic');
-        } else if (postalNaElement) {
-            fillElement(postalElement, 'text', '', postalTextKey, 'logic_clear');
-            fillElement(postalNaElement, 'checkbox', true, postalNaKey, 'logic_set_na');
-        }
-    } else if (postalNaElement) {
-         fillElement(postalNaElement, 'checkbox', true, postalNaKey, 'logic_set_na_no_text_field');
-    }
-
-    const countryElement = mappedElements[countryKey];
-    if (countryElement && addressParts.country) {
-        if(fillElement(countryElement, 'select', addressParts.country, countryKey, 'dynamic')) filledSomethingOverall = true;
-    }
-    
-    // Course of Study and Attendance Dates are not handled by this specific function
-    // as their mappings were not included in your latest request for this section.
-    // They would be handled by other direct API keys or other parsing functions.
-
-    return filledSomethingOverall;
+    return filledSomething;
 }
+
+// Place this in your "Helper Functions" section of content.js
 
 /**
  * Parses a comma-separated string of languages and fills the first language field.
@@ -2091,162 +2485,6 @@ function parseAndFillCountriesVisited(countriesVisitedString, mappedElements) {
     }
 
     return actionPerformed;
-}
-
-/**
- * Parses a previous employer's address string and fills the component fields.
- * Handles State/Province NA and Postal/ZIP NA checkboxes.
- * @param {string} fullAddressString - The complete address string from the API.
- * @param {string} employerPrefix - e.g., "prev_emp_1" or "prev_emp_2".
- * @param {object} mappedElements - Object containing the mapped DOM elements for the form.
- */
-function parseAndFillPreviousEmployerAddress(fullAddressString, employerPrefix, mappedElements) {
-    console.log(`[${employerPrefix} Addr] Attempting to parse: "${fullAddressString}"`);
-    if (!fullAddressString || typeof fullAddressString !== 'string' || fullAddressString.trim() === "") {
-        console.warn(`[${employerPrefix} Addr] Address string is empty or invalid. Setting NA checkboxes and clearing fields.`);
-        // Define keys for this employer's address components
-        const street1Key = `${employerPrefix}_street1_text`;
-        const street2Key = `${employerPrefix}_street2_text`;
-        const cityKey = `${employerPrefix}_city_text`;
-        const stateKey = `${employerPrefix}_state_text`;
-        const stateNaKey = `${employerPrefix}_state_na_checkbox`;
-        const postalKey = `${employerPrefix}_postal_text`;
-        const postalNaKey = `${employerPrefix}_postal_na_checkbox`;
-        const countryKey = `${employerPrefix}_country_select`;
-
-        // Clear fields and check NA where applicable
-        if (mappedElements[street1Key]) fillElement(mappedElements[street1Key], 'text', '', street1Key, 'logic_clear');
-        if (mappedElements[street2Key]) fillElement(mappedElements[street2Key], 'text', '', street2Key, 'logic_clear');
-        if (mappedElements[cityKey]) fillElement(mappedElements[cityKey], 'text', '', cityKey, 'logic_clear');
-        if (mappedElements[stateKey]) fillElement(mappedElements[stateKey], 'text', '', stateKey, 'logic_clear');
-        if (mappedElements[stateNaKey]) fillElement(mappedElements[stateNaKey], 'checkbox', true, stateNaKey, 'logic_set_na');
-        if (mappedElements[postalKey]) fillElement(mappedElements[postalKey], 'text', '', postalKey, 'logic_clear');
-        if (mappedElements[postalNaKey]) fillElement(mappedElements[postalNaKey], 'checkbox', true, postalNaKey, 'logic_set_na');
-        if (mappedElements[countryKey] && mappedElements[countryKey].options.length > 0) mappedElements[countryKey].selectedIndex = 0;
-
-        return 0;
-    }
-
-    let filledCount = 0;
-    const address = { street1: '', street2: '', city: '', state: '', postalCode: '', country: '' };
-    let remainingAddress = fullAddressString.trim();
-
-    // Heuristic parsing: This will need adjustment for various international address formats.
-    // This example prioritizes finding elements from right-to-left of a comma-separated address.
-
-    // 1. Attempt to extract Postal Code (common patterns: 5-10 alphanumeric chars, may include hyphen or space)
-    // This regex is very broad; more specific ones per country are better if possible.
-    const postalRegex = /([A-Z0-9\s-]{3,10})\s*$/i;
-    let match = remainingAddress.match(postalRegex);
-    if (match && /\d/.test(match[1])) { // Check if it contains at least one digit
-        address.postalCode = match[1].trim();
-        remainingAddress = remainingAddress.substring(0, match.index).trim().replace(/,$/, '').trim();
-        console.log(`  [${employerPrefix} Addr] Extracted Postal: "${address.postalCode}"`);
-    } else {
-        console.log(`  [${employerPrefix} Addr] Postal code not clearly extracted.`);
-    }
-
-    // 2. Attempt to extract Country (if dropdown exists, try to match; otherwise, assume last significant part)
-    const countryElement = mappedElements[`${employerPrefix}_country_select`];
-    const partsForCountry = remainingAddress.split(',').map(p => p.trim()).filter(p => p);
-    if (partsForCountry.length > 0) {
-        const potentialCountry = partsForCountry[partsForCountry.length - 1];
-        let countryMatched = false;
-        if (countryElement) {
-            for (const option of countryElement.options) {
-                if (option.text.toUpperCase() === potentialCountry.toUpperCase() || option.value.toUpperCase() === potentialCountry.toUpperCase()) {
-                    address.country = option.value; // Use the option's value attribute
-                    partsForCountry.pop();
-                    remainingAddress = partsForCountry.join(', ').trim();
-                    countryMatched = true;
-                    console.log(`  [${employerPrefix} Addr] Matched Country in dropdown: "${address.country}" for "${potentialCountry}"`);
-                    break;
-                }
-            }
-        }
-        if (!countryMatched && potentialCountry.length > 3 && potentialCountry.split(" ").length <= 3) { // Heuristic if no dropdown match or no dropdown
-            // If it wasn't matched in dropdown but looks like a country name
-            address.country = potentialCountry; // Store it; fillElement will try to match by text
-            partsForCountry.pop();
-            remainingAddress = partsForCountry.join(', ').trim();
-            console.log(`  [${employerPrefix} Addr] Tentatively Extracted Country: "${address.country}"`);
-        }
-    }
-     if (!address.country && address.postalCode && address.postalCode.match(/^\d{6}$/)) { // Default for Indian PIN
-        address.country = "IND";
-        console.log(`  [${employerPrefix} Addr] Defaulted country to IND based on PIN format.`);
-    }
-
-
-    // 3. Re-split remaining for City and State
-    const remainingPartsAfterCountry = remainingAddress.split(',').map(p => p.trim()).filter(p => p);
-    if (remainingPartsAfterCountry.length > 0) {
-        if (remainingPartsAfterCountry.length > 1) { // Assume last is state, one before is city
-            address.state = remainingPartsAfterCountry.pop();
-            console.log(`  [${employerPrefix} Addr] Extracted State: "${address.state}"`);
-        }
-        if (remainingPartsAfterCountry.length > 0) {
-            address.city = remainingPartsAfterCountry.pop();
-            console.log(`  [${employerPrefix} Addr] Extracted City: "${address.city}"`);
-        }
-        address.street1 = remainingPartsAfterCountry.join(', ').trim();
-    } else if (remainingAddress) {
-        address.street1 = remainingAddress; // Whatever is left is street
-    }
-
-
-    // Split street1 if too long (e.g., for a 40-char limit)
-    if (address.street1 && address.street1.length > 40) {
-        let splitPoint = address.street1.substring(0, 40).lastIndexOf(' ');
-        if (splitPoint === -1 || splitPoint < 10) splitPoint = 40; // Avoid tiny first lines
-        address.street2 = address.street1.substring(splitPoint).trim();
-        address.street1 = address.street1.substring(0, splitPoint).trim();
-        console.log(`  [${employerPrefix} Addr] Street address split: S1="${address.street1}", S2="${address.street2}"`);
-    }
-
-    console.log(`  [${employerPrefix} Addr] Final Parsed Parts:`, address);
-
-    // Fill form elements
-    if (mappedElements[`${employerPrefix}_street1_text`] && address.street1) {
-        if(fillElement(mappedElements[`${employerPrefix}_street1_text`], 'text', address.street1, `${employerPrefix}_street1_text`, 'dynamic')) filledCount++;
-    }
-    if (mappedElements[`${employerPrefix}_street2_text`]) { // Fill even if empty to clear previous
-        if(fillElement(mappedElements[`${employerPrefix}_street2_text`], 'text', address.street2 || '', `${employerPrefix}_street2_text`, 'dynamic')) filledCount++;
-    }
-    if (mappedElements[`${employerPrefix}_city_text`] && address.city) {
-        if(fillElement(mappedElements[`${employerPrefix}_city_text`], 'text', address.city, `${employerPrefix}_city_text`, 'dynamic')) filledCount++;
-    }
-
-    const stateTextEl = mappedElements[`${employerPrefix}_state_text`];
-    const stateNaEl = mappedElements[`${employerPrefix}_state_na_checkbox`];
-    if (stateTextEl) {
-        if (address.state) {
-            if(fillElement(stateTextEl, 'text', address.state, `${employerPrefix}_state_text`, 'dynamic')) filledCount++;
-            if (stateNaEl) fillElement(stateNaEl, 'checkbox', false, `${employerPrefix}_state_na_checkbox`, 'logic');
-        } else if (stateNaEl) { // No state parsed, check NA
-            fillElement(stateTextEl, 'text', '', `${employerPrefix}_state_text`, 'logic_clear');
-            fillElement(stateNaEl, 'checkbox', true, `${employerPrefix}_state_na_checkbox`, 'logic_set_na');
-        }
-    }
-
-    const postalTextEl = mappedElements[`${employerPrefix}_postal_text`];
-    const postalNaEl = mappedElements[`${employerPrefix}_postal_na_checkbox`];
-    if (postalTextEl) {
-        if (address.postalCode) {
-            if(fillElement(postalTextEl, 'text', address.postalCode, `${employerPrefix}_postal_text`, 'dynamic')) filledCount++;
-            if (postalNaEl) fillElement(postalNaEl, 'checkbox', false, `${employerPrefix}_postal_na_checkbox`, 'logic');
-        } else if (postalNaEl) {
-            fillElement(postalTextEl, 'text', '', `${employerPrefix}_postal_text`, 'logic_clear');
-            fillElement(postalNaEl, 'checkbox', true, `${employerPrefix}_postal_na_checkbox`, 'logic_set_na');
-        }
-    }
-
-    const countrySelEl = mappedElements[`${employerPrefix}_country_select`];
-    if (countrySelEl && address.country) {
-        if(fillElement(countrySelEl, 'select', address.country, `${employerPrefix}_country_select`, 'dynamic')) filledCount++;
-    }
-
-    return filledCount;
 }
 
 /**
@@ -2520,137 +2758,6 @@ function handleParentDOB(dobString, parentPrefix, mappedElements) {
 }
 
 /**
- * Attempts to parse a US address string into components.
- * IMPROVED to be more robust.
- * @param {string} fullAddress - The complete address string.
- * @returns {object|null} An object with keys like street1, street2, city, state, zip, or null.
- */
-function parseUSAddress(fullAddress) {
-    if (!fullAddress || typeof fullAddress !== 'string') return null;
-
-    console.log(`Parsing US Address: "${fullAddress}"`);
-    const address = { street1: null, street2: null, city: null, state: null, zip: null };
-
-    // US States mapping (Abbreviation -> Abbreviation, Full Name -> Abbreviation)
-    const usStates = { AL: 'AL', ALABAMA: 'AL', AK: 'AK', ALASKA: 'AK', AZ: 'AZ', ARIZONA: 'AZ', AR: 'AR', ARKANSAS: 'AR', CA: 'CA', CALIFORNIA: 'CA', CO: 'CO', COLORADO: 'CO', CT: 'CT', CONNECTICUT: 'CT', DE: 'DE', DELAWARE: 'DE', DC: 'DC', 'DISTRICT OF COLUMBIA': 'DC', FL: 'FL', FLORIDA: 'FL', GA: 'GA', GEORGIA: 'GA', HI: 'HI', HAWAII: 'HI', ID: 'ID', IDAHO: 'ID', IL: 'IL', ILLINOIS: 'IL', IN: 'IN', INDIANA: 'IN', IA: 'IA', IOWA: 'IA', KS: 'KS', KANSAS: 'KS', KY: 'KY', KENTUCKY: 'KY', LA: 'LA', LOUISIANA: 'LA', ME: 'ME', MAINE: 'ME', MD: 'MD', MARYLAND: 'MD', MA: 'MA', MASSACHUSETTS: 'MA', MI: 'MI', MICHIGAN: 'MI', MN: 'MN', MINNESOTA: 'MN', MS: 'MS', MISSISSIPPI: 'MS', MO: 'MO', MISSOURI: 'MO', MT: 'MT', MONTANA: 'MT', NE: 'NE', NEBRASKA: 'NE', NV: 'NV', NEVADA: 'NV', NH: 'NH', 'NEW HAMPSHIRE': 'NH', NJ: 'NJ', 'NEW JERSEY': 'NJ', NM: 'NM', 'NEW MEXICO': 'NM', NY: 'NY', 'NEW YORK': 'NY', NC: 'NC', 'NORTH CAROLINA': 'NC', ND: 'ND', 'NORTH DAKOTA': 'ND', OH: 'OH', OHIO: 'OH', OK: 'OK', OKLAHOMA: 'OK', OR: 'OR', OREGON: 'OR', PA: 'PA', PENNSYLVANIA: 'PA', RI: 'RI', 'RHODE ISLAND': 'RI', SC: 'SC', 'SOUTH CAROLINA': 'SC', SD: 'SD', 'SOUTH DAKOTA': 'SD', TN: 'TN', TENNESSEE: 'TN', TX: 'TX', TEXAS: 'TX', UT: 'UT', UTAH: 'UT', VT: 'VT', VERMONT: 'VT', VA: 'VA', VIRGINIA: 'VA', WA: 'WA', WASHINGTON: 'WA', WV: 'WV', 'WEST VIRGINIA': 'WV', WI: 'WI', WISCONSIN: 'WI', WY: 'WY', WYOMING: 'WY', AS: 'AS', 'AMERICAN SAMOA': 'AS', GU: 'GU', GUAM: 'GU', MP: 'MP', 'NORTHERN MARIANA ISLANDS': 'MP', PR: 'PR', 'PUERTO RICO': 'PR', VI: 'VI', 'VIRGIN ISLANDS': 'VI' };
-
-    // Regex for ZIP code (5 or 5-4 digits), potentially anywhere but often last
-    const zipRegex = /\b(\d{5})(?:[-\s]?(\d{4}))?\b/;
-    let remainingAddress = fullAddress;
-
-    // Extract ZIP code
-    const zipMatch = remainingAddress.match(zipRegex);
-    if (zipMatch) {
-        address.zip = zipMatch[1] + (zipMatch[2] ? `-${zipMatch[2]}` : ''); // Format as 12345 or 12345-6789
-        remainingAddress = remainingAddress.replace(zipMatch[0], '').trim(); // Remove ZIP from string
-        console.log(`  Found ZIP: ${address.zip}`);
-    } else {
-        console.warn("  Could not reliably identify ZIP code.");
-    }
-
-    // Extract State (Abbreviation or Full Name) - look near the end
-    remainingAddress = remainingAddress.replace(/[-,.\s]+$/, '').trim(); // Clean trailing chars
-    let potentialCityStateParts = remainingAddress.split(/,|\s+/).filter(p => p); // Split and remove empty
-
-    // Check last 1, 2, or 3 parts for state name/abbr
-    for (let i = Math.min(potentialCityStateParts.length, 3); i >= 1; i--) {
-        const potentialState = potentialCityStateParts.slice(-i).join(' ').toUpperCase();
-        if (usStates[potentialState]) {
-            address.state = usStates[potentialState]; // Store the abbreviation
-            // Remove the state parts from the end
-            potentialCityStateParts.splice(-i);
-            remainingAddress = potentialCityStateParts.join(' ').trim();
-            console.log(`  Found State: ${address.state} (matched "${potentialState}")`);
-            break;
-        }
-    }
-     if (!address.state) {
-         console.warn("  Could not reliably identify State.");
-     }
-
-    // Extract City (Usually the part before the State/ZIP)
-    remainingAddress = remainingAddress.replace(/[-,.\s]+$/, '').trim(); // Clean again
-    const cityParts = remainingAddress.split(/,|\s+/).filter(p => p); // Split remaining by comma or space
-    if (cityParts.length > 0) {
-         // Assume the last part is the city after removing state/zip
-         address.city = cityParts.pop();
-         remainingAddress = cityParts.join(' ').trim(); // What's left is street address
-         console.log(`  Found City: ${address.city}`);
-    } else {
-        console.warn("  Could not reliably identify City.");
-    }
-
-
-    // Assign remaining string to Street Address lines
-    // Basic split by common unit designators (case-insensitive)
-    // This assumes the unit designator is the *last* part of street2 if present
-    const streetRegex = /^(.*?)\s+(APT|UNIT|STE|#)\s*(.*)$/i;
-    const streetMatch = remainingAddress.match(streetRegex);
-
-    if (streetMatch) {
-        address.street1 = streetMatch[1]?.trim() || null; // Part before designator
-        address.street2 = (streetMatch[2] + " " + streetMatch[3]).trim(); // Designator + rest
-    } else {
-        // If no unit designator found, assign whole remaining part to street1
-        address.street1 = remainingAddress.trim() || null;
-        address.street2 = null;
-    }
-
-    console.log(`  Assigned Street 1: ${address.street1}`);
-    if(address.street2) console.log(`  Assigned Street 2: ${address.street2}`);
-
-
-    console.log("  Final Parsed Address:", address);
-    return address;
-}
-
-
-/**
- * Parses a full US address string and fills the component fields.
- * @param {string} fullAddress - The complete address string from the API.
- * @param {object} mappedElements - The object containing found form elements.
- * @returns {number} Count of address fields successfully filled.
- */
-function parseAndFillUSAddress(fullAddress, mappedElements) {
-    let filledCount = 0;
-    const parsed = parseUSAddress(fullAddress);
-
-    if (!parsed) {
-        console.warn("US Address parsing failed.");
-        return 0;
-    }
-
-    // Fill individual components
-    const fieldsToFill = [
-        { key: 'us_address_street1', value: parsed.street1, type: 'text' },
-        { key: 'us_address_street2', value: parsed.street2, type: 'text' },
-        { key: 'us_address_city', value: parsed.city, type: 'text' },
-        { key: 'us_address_state', value: parsed.state, type: 'select' }, // State is a dropdown
-        { key: 'us_address_zip', value: parsed.zip, type: 'text' }
-    ];
-
-    fieldsToFill.forEach(field => {
-        if (field.value) { // Only attempt to fill if parsing yielded a value
-            const element = mappedElements[field.key];
-            if (element) {
-                // Add try-catch around individual fillElement calls for address parts
-                try {
-                    if (fillElement(element, field.type, field.value, field.key, 'dynamic')) {
-                        filledCount++;
-                    }
-                } catch (error) {
-                     console.error(`Error filling address component "${field.key}":`, error);
-                }
-            } else {
-                console.warn(`Element not found for US address component: "${field.key}"`);
-            }
-        }
-    });
-
-    return filledCount;
-}
-
-/**
 * Splits a full name into surname and given names.
 * Basic implementation: assumes last word is surname.
 * @param {string} fullName - The full name string.
@@ -2746,300 +2853,6 @@ function parseAndFillTravelCompanions(companionsString, mappedElements) {
     return filledCount > 0; // Return true if any part of the first companion was filled
 }
 
-/**
-* Parses the Home Address string and fills the component fields.
-* Prioritizes filling Street 1 and Postal Code. Assumes country is India.
-* Leaves City and State blank and checks their 'Does Not Apply' boxes.
-* @param {string} fullAddress - The complete address string from the API.
-* @param {object} mappedElements - The object containing found form elements.
-* @returns {number} Count of address fields successfully filled.
-*/
-function parseAndFillHomeAddress(fullAddress, mappedElements) {
-    if (!fullAddress || typeof fullAddress !== 'string') {
-        console.warn("Home Address string is empty or invalid.");
-        return 0;
-    }
-    console.log(`Parsing Home Address: "${fullAddress}"`);
-    let filledCount = 0;
-    let remainingAddressForStreet1 = fullAddress.trim();
-    let pinCode = null;
-    let city = null;
-    const MAX_STREET1_LENGTH = 38; // Max length for Street Address Line 1
-
-    // Attempt to extract 6-digit PIN code from the end
-    const pinRegex = /\b(\d{6})\b$/;
-    const pinMatch = remainingAddressForStreet1.match(pinRegex);
-    if (pinMatch) {
-        pinCode = pinMatch[1];
-        remainingAddressForStreet1 = remainingAddressForStreet1.substring(0, pinMatch.index).trim().replace(/[,.\s]+$/, '');
-        console.log(`  Found PIN Code: ${pinCode}`);
-    } else {
-        console.warn("  Could not reliably identify 6-digit PIN code at the end of home address.");
-    }
-
-    // Attempt to extract City (last word before PIN, if PIN was found, or last word otherwise)
-    if (remainingAddressForStreet1) {
-        const addressParts = remainingAddressForStreet1.split(/\s+/);
-        if (addressParts.length > 0) {
-            let potentialCity = addressParts.pop();
-            if (addressParts.length > 0 && addressParts[addressParts.length - 1].toLowerCase() === 'post') {
-                addressParts.pop(); // Remove "post" if it's before the city
-            }
-            city = potentialCity;
-            remainingAddressForStreet1 = addressParts.join(' ').trim();
-            console.log(`  Attempted City Extraction: "${city}"`);
-        }
-    }
-
-    // --- Fill Fields ---
-    const street1Element = mappedElements['home_address_street1'];
-    const street2Element = mappedElements['home_address_street2'];
-    const cityElement = mappedElements['home_address_city'];
-    const postalCodeElement = mappedElements['home_address_postal'];
-    const countryElement = mappedElements['home_address_country'];
-    const stateNaElement = mappedElements['home_address_state_na'];
-    const postalNaElement = mappedElements['home_address_postal_na'];
-
-    // Fill Street Address 1 and 2
-    if (street1Element && remainingAddressForStreet1) {
-        let street1Value = remainingAddressForStreet1;
-        let street2Value = "";
-
-        if (remainingAddressForStreet1.length > MAX_STREET1_LENGTH) {
-            let splitIndex = remainingAddressForStreet1.substring(0, MAX_STREET1_LENGTH).lastIndexOf(' ');
-            if (splitIndex === -1 || splitIndex < MAX_STREET1_LENGTH / 2) { // If no space or space is too early, just truncate
-                splitIndex = MAX_STREET1_LENGTH;
-            }
-            street1Value = remainingAddressForStreet1.substring(0, splitIndex).trim();
-            street2Value = remainingAddressForStreet1.substring(splitIndex).trim();
-            console.log(`  Street address too long, splitting: Line 1="${street1Value}", Line 2="${street2Value}"`);
-        }
-
-        try {
-            if (fillElement(street1Element, 'text', street1Value, 'home_address_street1', 'dynamic')) {
-                filledCount++;
-            }
-            if (street2Element && street2Value) { // Only fill street 2 if there's content for it
-                if (fillElement(street2Element, 'text', street2Value, 'home_address_street2', 'dynamic')) {
-                    filledCount++;
-                }
-            } else if (street2Element) {
-                street2Element.value = ''; // Ensure it's empty if no overflow
-            }
-        } catch (error) { console.error(`Error filling home_address_street1/2:`, error); }
-    }
-
-
-    // Fill City if found
-    if (cityElement && city) {
-        try {
-            if (fillElement(cityElement, 'text', city, 'home_address_city', 'dynamic')) {
-                filledCount++;
-            }
-        } catch (error) { console.error(`Error filling home_address_city:`, error); }
-    }
-
-
-    // Fill Postal Code if found
-    let postalFilled = false;
-    if (postalCodeElement && pinCode) {
-        try {
-            if (fillElement(postalCodeElement, 'text', pinCode, 'home_address_postal', 'dynamic')) {
-                filledCount++;
-                postalFilled = true;
-            }
-        } catch (error) { console.error(`Error filling home_address_postal:`, error); }
-    }
-
-    // Fill Country (Defaulting to INDIA - adjust if API provides country)
-    if (countryElement) {
-        try {
-            // Assuming 'IND' is the correct value for India in the dropdown
-            if (fillElement(countryElement, 'select', 'IND', 'home_address_country', 'dynamic')) {
-                filledCount++;
-            }
-        } catch (error) { console.error(`Error filling home_address_country:`, error); }
-    }
-
-    // Handle "Does Not Apply" checkboxes
-    // Check State NA (since we are not filling the state field)
-    if (stateNaElement) {
-        try {
-            // Always check NA for state since we don't parse it from home_address
-            fillElement(stateNaElement, 'checkbox', true, 'home_address_state_na', 'dynamic');
-        } catch (error) { console.error(`Error checking home_address_state_na:`, error); }
-    }
-    // Check/Uncheck Postal NA based on whether we filled the postal code
-    if (postalNaElement) {
-         try {
-            // Check NA only if postal code was NOT filled
-            fillElement(postalNaElement, 'checkbox', !postalFilled, 'home_address_postal_na', 'dynamic');
-         } catch (error) { console.error(`Error setting home_address_postal_na:`, error); }
-    }
-
-    // Leave State blank as it's not reliably parsed
-
-    return filledCount;
-}
-
-/**
- * Fills the Present Employer or School Name field.
- * @param {object} formData - The data object from the API.
- * @param {object} mappedElements - Object containing the mapped DOM elements.
- */
-function parseAndFillEmployerSchoolName(formData, mappedElements) {
-    console.log("[Employer/School Name] Attempting to fill...");
-    const mapping = formFieldMapping.find(m => m.form_key === 'employer_school_name_text');
-    if (!mapping) {
-        console.warn("[Employer/School Name] Mapping not found for 'employer_school_name_text'.");
-        return;
-    }
-
-    const employerNameValue = findValueFromApiKeys(formData, mapping.api_keys);
-    const element = mappedElements['employer_school_name_text'];
-
-    if (!element) {
-        console.warn("[Employer/School Name] HTML element not found for 'employer_school_name_text'.");
-        return;
-    }
-
-    if (employerNameValue !== undefined && employerNameValue !== null) {
-        // If API provides an empty string, we'll fill it. If it's null/undefined, we treat as "not provided".
-        const valueToFill = String(employerNameValue); // Ensure it's a string
-        console.log(`[Employer/School Name] API value: "${valueToFill}"`);
-        fillElement(element, 'text', valueToFill, 'employer_school_name_text', 'dynamic');
-    } else {
-        console.log("[Employer/School Name] No data provided by API for 'current_employer_name'. Clearing field.");
-        fillElement(element, 'text', '', 'employer_school_name_text', 'logic_clear'); // Clear if no data
-    }
-}
-
-/**
- * Parses the Employer/School address string and fills the component fields.
- * Handles State NA and Postal NA checkboxes.
- * @param {string} fullAddress - The complete address string from the API.
- * @param {object} mappedElements - The object containing found form elements.
- * @returns {number} Count of address fields successfully filled.
- */
-function parseAndFillEmployerSchoolAddress(fullAddress, mappedElements) {
-    if (!fullAddress || typeof fullAddress !== 'string' || fullAddress.trim() === "") {
-        console.warn("[Employer/School Address] Address string is empty or invalid. Handling NA checkboxes.");
-        const street1El = mappedElements['employer_school_street1_text'];
-        const street2El = mappedElements['employer_school_street2_text'];
-        const cityEl = mappedElements['employer_school_city_text'];
-        const stateTextEl = mappedElements['employer_school_state_text'];
-        const stateNaEl = mappedElements['employer_school_state_na_checkbox'];
-        const postalTextEl = mappedElements['employer_school_postal_text'];
-        const postalNaEl = mappedElements['employer_school_postal_na_checkbox'];
-        const countryEl = mappedElements['employer_school_country_select'];
-
-        if (street1El) fillElement(street1El, 'text', '', 'employer_school_street1_text', 'logic_clear');
-        if (street2El) fillElement(street2El, 'text', '', 'employer_school_street2_text', 'logic_clear');
-        if (cityEl) fillElement(cityEl, 'text', '', 'employer_school_city_text', 'logic_clear');
-        if (stateTextEl) fillElement(stateTextEl, 'text', '', 'employer_school_state_text', 'logic_clear');
-        if (stateNaEl) fillElement(stateNaEl, 'checkbox', true, 'employer_school_state_na_checkbox', 'logic_set_na');
-        if (postalTextEl) fillElement(postalTextEl, 'text', '', 'employer_school_postal_text', 'logic_clear');
-        if (postalNaEl) fillElement(postalNaEl, 'checkbox', true, 'employer_school_postal_na_checkbox', 'logic_set_na');
-        if (countryEl && countryEl.options.length > 0) countryEl.selectedIndex = 0; // Reset country
-
-        return 0;
-    }
-    console.log(`[Employer/School Address] Parsing: "${fullAddress}"`);
-    let filledCount = 0;
-    let addressParts = {
-        street1: '',
-        street2: '',
-        city: '',
-        state: '',
-        postalCode: '',
-        country: 'IND' // Defaulting to India, adjust if country info is in address string or from API
-    };
-
-    let remainingAddress = fullAddress.trim();
-
-    // Attempt to extract Indian PIN code (6 digits from the end)
-    const pinRegex = /\b(\d{6})\s*$/;
-    let match = remainingAddress.match(pinRegex);
-    if (match) {
-        addressParts.postalCode = match[1];
-        remainingAddress = remainingAddress.substring(0, match.index).trim().replace(/,$/, '').trim();
-        console.log("  [Emp Addr] Extracted Postal (IND):", addressParts.postalCode);
-    }
-
-    // Attempt to extract State then City (common for Indian addresses: ..., City, State, PIN)
-    const addressComponents = remainingAddress.split(',').map(s => s.trim()).filter(s => s);
-    if (addressComponents.length > 0) {
-        if (addressComponents.length > 1) { // Potentially State and City available
-            const potentialState = addressComponents.pop();
-            if (potentialState.length > 2 && potentialState.toUpperCase() !== addressParts.city?.toUpperCase()) { // Basic check
-                addressParts.state = potentialState;
-                console.log("  [Emp Addr] Extracted State:", addressParts.state);
-                if (addressComponents.length > 0) {
-                    addressParts.city = addressComponents.pop();
-                    console.log("  [Emp Addr] Extracted City (after state):", addressParts.city);
-                }
-            } else { // Assume it was city or part of city
-                addressParts.city = potentialState;
-                 console.log("  [Emp Addr] Extracted City (no clear state after it):", addressParts.city);
-            }
-        } else if (addressComponents.length === 1 && !addressParts.city) { // Only one part left, could be city
-            addressParts.city = addressComponents.pop();
-            console.log("  [Emp Addr] Extracted City (single remaining part):", addressParts.city);
-        }
-        addressParts.street1 = addressComponents.join(', ').trim();
-    } else if (!addressParts.city && remainingAddress) { // No commas, but text remains
-         addressParts.street1 = remainingAddress; // Could be street, or city if address is very short
-         console.log("  [Emp Addr] No commas found, remaining treated as street1:", addressParts.street1);
-    }
-
-
-    if (addressParts.street1 && addressParts.street1.length > 40) {
-        let splitPoint = addressParts.street1.substring(0, 40).lastIndexOf(' ');
-        if (splitPoint === -1 || splitPoint < 10) splitPoint = 40;
-        addressParts.street2 = addressParts.street1.substring(splitPoint).trim();
-        addressParts.street1 = addressParts.street1.substring(0, splitPoint).trim();
-    }
-
-    console.log("  [Emp Addr] Final Parsed: ", addressParts);
-
-    // Fill elements
-    if (mappedElements['employer_school_street1_text'] && addressParts.street1) {
-        if(fillElement(mappedElements['employer_school_street1_text'], 'text', addressParts.street1, 'employer_school_street1_text', 'dynamic')) filledCount++;
-    }
-    if (mappedElements['employer_school_street2_text'] && addressParts.street2) {
-        if(fillElement(mappedElements['employer_school_street2_text'], 'text', addressParts.street2, 'employer_school_street2_text', 'dynamic')) filledCount++;
-    }
-    if (mappedElements['employer_school_city_text'] && addressParts.city) {
-        if(fillElement(mappedElements['employer_school_city_text'], 'text', addressParts.city, 'employer_school_city_text', 'dynamic')) filledCount++;
-    }
-
-    const stateElement = mappedElements['employer_school_state_text'];
-    const stateNaElement = mappedElements['employer_school_state_na_checkbox'];
-    if (stateElement && addressParts.state) {
-        if(fillElement(stateElement, 'text', addressParts.state, 'employer_school_state_text', 'dynamic')) filledCount++;
-        if (stateNaElement) fillElement(stateNaElement, 'checkbox', false, 'employer_school_state_na_checkbox', 'logic');
-    } else if (stateNaElement) {
-        if (stateElement) fillElement(stateElement, 'text', '', 'employer_school_state_text', 'logic_clear');
-        fillElement(stateNaElement, 'checkbox', true, 'employer_school_state_na_checkbox', 'logic_set_na');
-    }
-
-    const postalElement = mappedElements['employer_school_postal_text'];
-    const postalNaElement = mappedElements['employer_school_postal_na_checkbox'];
-    if (postalElement && addressParts.postalCode) {
-        if(fillElement(postalElement, 'text', addressParts.postalCode, 'employer_school_postal_text', 'dynamic')) filledCount++;
-        if (postalNaElement) fillElement(postalNaElement, 'checkbox', false, 'employer_school_postal_na_checkbox', 'logic');
-    } else if (postalNaElement) {
-        if (postalElement) fillElement(postalElement, 'text', '', 'employer_school_postal_text', 'logic_clear');
-        fillElement(postalNaElement, 'checkbox', true, 'employer_school_postal_na_checkbox', 'logic_set_na');
-    }
-
-    const countryElement = mappedElements['employer_school_country_select'];
-    if (countryElement && addressParts.country) {
-        if(fillElement(countryElement, 'select', addressParts.country, 'employer_school_country_select', 'dynamic')) filledCount++;
-    }
-
-    return filledCount;
-}
 
 /**
  * Parses the social_media_presence string and fills the platform and identifier fields.
@@ -3158,14 +2971,12 @@ function fillForm(formData, mappedElements) {
             continue;
         }
 
-        const specialKeys = ['dob', 'arrival_date', 'departure_date', 'us_stay_address', 'home_address', 'pob_state_na', 'intended_los_value', 'intended_los_unit', 'social_media_presence', 'passport_issue_date', 'passport_expiry_date','spouse_dob_source','employment_start_date_source','employer_school_address_source','prev_emp_1_address_source','prev_emp_1_start_date_source','prev_emp_1_end_date_source','education_1_address_source','education_1_start_date_source','education_1_end_date_source'];
+        const specialKeys = ['dob', 'arrival_date', 'departure_date', 'us_stay_address', 'home_address', 'pob_state_na', 'intended_los_value', 'intended_los_unit', 'social_media_presence', 'passport_issue_date', 'passport_expiry_date','spouse_dob_source','employment_start_date_source','employer_school_address_source','prev_emp_1_address_source','prev_emp_1_start_date_source','prev_emp_1_end_date_source','education_1_address_source','education_1_start_date_source','education_1_end_date_source','spouse_pob_source'];
         const dateComponentKeys = ['dob_day', 'dob_month', 'dob_year', 'arrival_date_day', 'arrival_date_month', 'arrival_date_year', 'passport_issue_date_day', 'passport_issue_date_month', 'passport_issue_date_year', 'passport_expiry_date_day', 'passport_expiry_date_month', 'passport_expiry_date_year','employment_start_date_day','employment_start_date_month','employment_start_date_year','prev_emp_1_start_date_day','prev_emp_1_start_date_month','prev_emp_1_start_date_year','prev_emp_1_end_date_day','prev_emp_1_end_date_month','prev_emp_1_end_date_year','education_1_start_date_day','education_1_start_date_month','education_1_start_date_year','education_1_end_date_day','education_1_end_date_month','education_1_end_date_year'];
-        const addressComponentKeys = ['us_address_street1', 'us_address_street2', 'us_address_city', 'us_address_state', 'us_address_zip'];
-        const homeAddressComponentKeys = ['home_address_street1', 'home_address_street2', 'home_address_city', 'home_address_state', 'home_address_state_na', 'home_address_postal', 'home_address_postal_na', 'home_address_country'];
         const companionComponentKeys = ['companion_surname_1', 'companion_given_name_1', 'companion_relationship_1'];
         const socialMediaComponentKeys = ['social_media_platform_1', 'social_media_identifier_1'];
 
-        if (!api_keys || api_keys.length === 0 || specialKeys.includes(form_key) || dateComponentKeys.includes(form_key) || addressComponentKeys.includes(form_key) || companionComponentKeys.includes(form_key) || homeAddressComponentKeys.includes(form_key) || socialMediaComponentKeys.includes(form_key) || form_key === 'national_id_na' || form_key === 'passport_expiry_na' ) {
+        if (!api_keys || api_keys.length === 0 || specialKeys.includes(form_key) || dateComponentKeys.includes(form_key) || companionComponentKeys.includes(form_key) || socialMediaComponentKeys.includes(form_key) || form_key === 'national_id_na' || form_key === 'passport_expiry_na' ) {
              continue;
         }
 
@@ -3255,13 +3066,9 @@ function fillForm(formData, mappedElements) {
      const eduInstitutionEndDatevalue = findValueFromApiKeys(formData, eduInstitutionEndDateMapping?.api_keys);
      const languagesSpokenString = findValueFromApiKeys(formData, ["languages_spoken"]);
      const countriesVisitedString = findValueFromApiKeys(formData, ["countries_visited_last_5_years"]);
+     const usContactRelationshipValue = findValueFromApiKeys(formData, ["us_contact_relationship"]);
+     const spousePobValue = findValueFromApiKeys(formData, formFieldMapping.find(m => m.form_key === 'spouse_pob_source')?.api_keys);
 
-
-
-
-
-     const prevEmp1AddressValue = findValueFromApiKeys(formData, formFieldMapping.find(m => m.form_key === 'prev_emp_1_address_source')?.api_keys);
-     const eduInstitutionValue = findValueFromApiKeys(formData, formFieldMapping.find(m => m.form_key === 'education_1_address_source')?.api_keys);
 
 
 
@@ -3351,6 +3158,7 @@ function fillForm(formData, mappedElements) {
               if(formData.hasOwnProperty(key) && formData[key] !== null){ passportExpiryDateValue = formData[key]; break;}
           }
       }
+      
 
 
      // Now parse and fill using the found values
@@ -3386,35 +3194,7 @@ function fillForm(formData, mappedElements) {
          if (departureValue) {
              departureDateStr = departureValue; // Store for LOS
          }
-         if (prevEmp1AddressValue) {
-            parseAndFillPreviousEmployerAddress(prevEmp1AddressValue, "prev_emp_1", mappedElements);
-        }
 
-        if (eduInstitutionValue) {
-            parseAndFillPreviousEmployerAddress(eduInstitutionValue, "education_1", mappedElements);
-        }
-         // --- Conditional US Address Filling ---
-         const usAddressLabelElement = document.getElementById('ctl00_SiteContentPlaceHolder_FormView1_lblAddressInUS');
-         if (usAddressLabelElement && usAddressValue) {
-             parseAndFillUSAddress(usAddressValue, mappedElements);
-         } else if (usAddressValue) {
-             console.log("Did not find 'Address Where You Will Stay' label, skipping US address filling.");
-         }
-         // --- Fill Home Address ---
-         const homeAddressLabelElement = document.getElementById('ctl00_SiteContentPlaceHolder_FormView1_lblHomeAdressInfo');
-         if (homeAddressLabelElement && homeAddressValue) {
-             parseAndFillHomeAddress(homeAddressValue, mappedElements);
-         } else if (homeAddressValue) {
-            console.log("Did not find 'Home Address' label, skipping Home address filling.");
-         }
-
-
-         parseAndFillEmployerSchoolName(formData, mappedElements); // <<< CALL NEW FUNCTION HERE
-
-         if (employerSchoolAddressValue) {
-            console.log("Attempting to parse and fill Employer/School Address from:", employerSchoolAddressValue);
-            parseAndFillEmployerSchoolAddress(employerSchoolAddressValue, mappedElements);
-        }
 
          if (fatherDobValue !== undefined) {
             handleParentDOB(String(fatherDobValue || ""), 'father', mappedElements);
@@ -3435,6 +3215,18 @@ function fillForm(formData, mappedElements) {
          if (companionsValue) {
              parseAndFillTravelCompanions(companionsValue, mappedElements);
          }
+
+         if (spousePobValue !== undefined) { // Check if the key was present in API data
+            parseAndFillSpousePOB(spousePobValue, mappedElements);
+        } else {
+            console.log("[Main Fill] No spouse_pob data from API. Ensuring POB City 'Do Not Know' is checked if element exists.");
+            const cityUnkElement = mappedElements['spouse_pob_city_unk'];
+            if (cityUnkElement) {
+                 fillElement(cityUnkElement, 'checkbox', true, 'spouse_pob_city_unk', 'logic_no_data');
+            }
+            const countryElement = mappedElements['spouse_pob_country_select'];
+            if (countryElement && countryElement.options.length > 0) countryElement.selectedIndex = 0; // Reset
+        }
 
          // --- Logic for National ID and its NA checkbox ---
          if (nationalIdApiValue) { // If a National ID is provided
@@ -3464,6 +3256,16 @@ function fillForm(formData, mappedElements) {
             }
         }
         // --- END National ID Logic ---
+
+        if (usContactRelationshipValue !== undefined) {
+            parseAndFillUSContactRelationship(usContactRelationshipValue, mappedElements);
+        } else {
+            console.log("[Main Fill] No 'us_contact_relationship' data from API. Dropdown may use default.");
+            const pocRelDropdown = mappedElements["us_contact_relationship_select"];
+            if (pocRelDropdown && pocRelDropdown.options.length > 0) { // Reset to default if no API value
+                fillElement(pocRelDropdown, 'select', "", "us_contact_relationship_select", 'logic_default_no_api_data');
+            }
+        }
 
         // --- Social Media Parser ---
         if (socialMediaPresenceValue !== undefined) {
@@ -3616,12 +3418,6 @@ function fillHardcodedFields(mappedElements) {
     console.log(`Hardcoded form filling finished. ${fieldsFilledCount} fields/groups filled.`);
 }
 
-
-// --- Initialization and Message Handling ---
-
-/**
- * Finds and maps all relevant form elements based on formFieldMapping.
- */
 function findAndMapFormElements() {
     const foundElements = {};
     // console.log("Starting element mapping..."); // Reduce noise
@@ -3640,28 +3436,27 @@ function findAndMapFormElements() {
     return foundElements;
 }
 
-// Listen for messages from popup or background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("Content script received message:", request.action);
-    // Wrap the entire message handling in try-catch
     try {
         const mappedElements = findAndMapFormElements(); // Find elements on message receipt
 
         if (request.action === "fillForm" && request.data) {
             console.log("Received dynamic form data payload.");
-            // --- ADDED JSON LOGGING ---
-            console.log("Received formData:", JSON.stringify(request.data, null, 2)); // Log the received JSON
-            // --------------------------
-            // --- MODIFIED ORDER: Hardcode first ---
+            console.log("Received formData:", JSON.stringify(request.data, null, 2));
             fillHardcodedFields(mappedElements);
-            fillForm(request.data, mappedElements); // Fill dynamic data (will skip hardcoded fields)
-            // ------------------------------------
-            sendResponse({ status: "Filling complete." }); // Removed auto-next logic
+            fillForm(request.data, mappedElements);
+            sendResponse({ status: "Filling complete." });
+
+            // You'll need to identify the selector for your specific button
+           
+            // --- END AUTO-REDIRECT LOGIC ---
 
         } else if (request.action === "fillHardcoded") {
             console.log("Received 'fillHardcoded' action.");
-            fillHardcodedFields(mappedElements); // Fill only hardcoded values
-            sendResponse({ status: "Hardcoded filling completed." }); // Removed auto-next logic
+            fillHardcodedFields(mappedElements);
+            sendResponse({ status: "Hardcoded filling completed." });
+
 
         } else if (request.action === "fillForm" && !request.data) {
             console.warn("Received 'fillForm' message but no data payload.");
@@ -3671,11 +3466,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({ status: "Unknown action" });
         }
     } catch (error) {
-         console.error("Error processing message:", request.action, error);
-         sendResponse({ status: "Error processing message." });
+        console.error("Error processing message:", request.action, error);
+        sendResponse({ status: "Error processing message." });
     }
-    // Return true because sendResponse might be called asynchronously
+    // Return true because sendResponse might be called asynchronously,
+    // especially if you add delays or further async operations before navigation.
     return true;
+
+    
 });
 
 console.log("Form Filler Content Script initialized. Waiting for messages...");
+

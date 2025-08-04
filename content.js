@@ -1698,10 +1698,86 @@ const formFieldMapping = [
     field_type: "radio",
     locator: { type: "name", value: "ctl00$SiteContentPlaceHolder$FormView1$rblRenounceExp" }
 },
-// --- End of Security and Background Mappings for this snippet ---
-// --- End of Security and Background Mappings for this snippet ---
-// --- End of Security and Background Mappings for this snippet ---
-// --- End of Security and Background: Part 1 Mappings ---
+
+{
+    form_key: "passport_number",
+    label_texts: ["passport_number"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "",
+    locator: { type: "xpath", value: "/html/body/form/main/div/div/div/div/div[1]/div[2]/div[2]/div/fieldset[4]/table/tbody/tr[2]/td[1]/div[2]/input"}
+},
+
+{
+    //form_key: "Passport_place_of_issue",
+    label_texts: [""],
+    api_keys: ["Place_of_Issue"], // ASSUMED API key
+    field_type: "text",
+    locator: { type: "xpath", value: "/html/body/form/main/div/div/div/div/div[1]/div[2]/div[2]/div/fieldset[4]/table/tbody/tr[4]/td[1]/div[2]/input" }
+},
+
+{
+    form_key: "visa_type_select",
+    label_texts: ["Visa Type"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "select",
+    locator: { type: "xpath", value: "/html/body/form/main/div/div/div[2]/div/div/div/div/div/fieldset/table/tbody/tr[3]/td[1]/div[2]/select" }
+},
+
+{
+    form_key: "embassy_location_select",
+    label_texts: ["Embassy/Consulate/OFC"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "select",
+    locator: { type: "xpath", value: "/html/body/form/main/div/div/div[2]/div/div/div/div/div/fieldset/table/tbody/tr[4]/td[1]/div[2]/select"}
+},
+
+{
+    form_key: "post_visa_category_select",
+    label_texts: ["Post Visa Category"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "select",
+    locator: { type: "xpath", value: "/html/body/form/main/div/div/div[2]/div/div/div/div/div/fieldset/table/tbody/tr[6]/td[1]/div[2]/select"}
+},
+
+{
+    form_key: "visa_type_radio",
+    label_texts: ["B1/B2"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "radio",
+    locator: { type: "name", value: "radio_button"}
+},
+
+{
+    form_key: "Citizenship_status_radio",
+    label_texts: ["Are you a citizen of India/Bhutan OR a lawful resident of India/Bhutan?"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "radio",
+    //locator: { type: "name", value: "question-answer"}
+},
+
+{
+    form_key: "under_14_radio",
+    label_texts: ["Are you (the visa applicant) under 14 years of age?"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "radio",
+    //locator: { type: "name", value: "question-answer"}
+},
+
+{
+    form_key: "above_80_radio",
+    label_texts: ["Are you (the visa applicant) 80 years of age or older?"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "radio",
+    //locator: { type: "name", value: "question-answer"}
+},
+
+{
+    form_key: "prev_b1_b2_visa_radio",
+    label_texts: ["Do you have a previous B-1/B-2 visa (visitor for Business and Pleasure) issued on or after your 14th birthday??"],
+    api_keys: [""], // ASSUMED API key
+    field_type: "radio",
+    //locator: { type: "name", value: "question-answer"}
+},
 
 // End of new mappings... (make sure this is inside the main array ']')
 ];
@@ -1762,6 +1838,14 @@ const hardcodedValues = {
     "withheld_child_custody_radio":"N",
     "voting_violation_radio":"N",
     "renounced_citizenship_tax_radio":"N",
+    "visa_type_select" : "Non-Immigrant",
+    "embassy_location_select" : "CHENNAI",
+    "post_visa_category_select": "Business/Tourism",
+    "visa_type_radio": "1e58cbb1-a5db-ec11-a7b4-001dd802327e",
+    "Citizenship_status_radio": "Yes",
+    "under_14_radio":"No",
+    "above_80_radio":"No",
+    "prev_b1_b2_visa_radio":"No",
 };
 
 // --- Helper Functions ---
@@ -3477,4 +3561,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 console.log("Form Filler Content Script initialized. Waiting for messages...");
-

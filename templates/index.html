@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ID Doc & Word Upload + DB</title>
+    <style>
+        /* --- Keep all your existing CSS styles --- */
+        body { font-family: system-ui, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #343a40; line-height: 1.6; }
+        .container { max-width: 700px; margin: 40px auto; background: #ffffff; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        h2 { margin-bottom: 30px; font-size: 1.8rem; color: #0056b3; font-weight: 600; } /* Adjusted size */
+
+        /* Style for the new dropdown */
+        select#docTypeSelect {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            font-size: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background-color: #fff;
+            cursor: pointer;
+            color: #495057;
+            appearance: none; /* Optional: for custom arrow later */
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Basic dropdown arrow */
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
+        }
+        select#docTypeSelect:disabled {
+             background-color: #e9ecef;
+             cursor: not-allowed;
+             opacity: 0.7;
+        }
+
+
+        #drop-area { border: 3px dashed #adb5bd; padding: 40px; margin-bottom: 25px; border-radius: 8px; transition: background-color 0.2s ease, border-color 0.2s ease; cursor: pointer; background-color: #f1f3f5; }
+        #drop-area.highlight { background-color: #e7f5ff; border-color: #007bff; }
+        #drop-area.disabled {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        #drop-area p { color: #495057; font-size: 1.1rem; margin: 0; font-weight: 500; }
+        .file-label, button { display: inline-block; padding: 12px 28px; font-size: 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease; border: none; margin: 5px; }
+        .file-label { background-color: #007bff; color: white; }
+        .file-label:hover { background-color: #0056b3; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .file-label.disabled { /* Style for disabled label */
+            background-color: #ced4da;
+            cursor: not-allowed;
+            box-shadow: none;
+             opacity: 0.7;
+        }
+        button { background-color: #28a745; color: white; }
+        button:disabled { background-color: #ced4da; cursor: not-allowed; box-shadow: none; }
+        button:hover:not(:disabled) { background-color: #218838; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #fileElem { display: none; }
+        #file-name { font-size: 0.9rem; color: #6c757d; margin-top: 15px; margin-bottom: 20px; text-align: center; min-height: 18px; word-wrap: break-word; }
+        #result { margin-top: 35px; font-size: 1rem; color: #212529; text-align: left; background-color: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; min-height: 50px; word-wrap: break-word; }
+        #result ul { list-style-type: none; padding: 0; margin: 0; }
+        #result li { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        #result li:last-child { border-bottom: none; }
+        #result strong { color: #0056b3; margin-right: 8px; flex-shrink: 0; }
+        #result span { text-align: right; word-break: break-all; }
+        .processing-text { color: #007bff; font-size: 1.1rem; font-weight: 600; text-align: center; padding: 10px 0; }
+        .error, #result .error strong { color: #dc3545 !important; font-weight: bold; }
+        .status-section { margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef; }
+        .status-section p { margin: 5px 0; padding: 8px 12px; border-radius: 4px; font-weight: 500; font-size: 0.95rem; } /* Slightly smaller status text */
+        .status-section .db-status-success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .status-section .db-status-error, .status-section .analysis-status-error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .status-section .db-status-skipped, .status-section .db-status-na { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; } /* Added NA style */
+        .status-section pre { white-space: pre-wrap; word-wrap: break-word; background: #e9ecef; padding: 10px; margin-top: 5px; border-radius: 4px; max-height: 150px; overflow-y: auto; font-size: 0.85rem; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🛂 Upload ID Document or Word File 📄 & Save</h2>
+
+        <select id="docTypeSelect">
+            <option value="" disabled selected>-- Select Document Type --</option>
+            <option value="passport">Passport Image</option>
+            <option value="aadhaar">Aadhaar Image</option>
+            <option value="word_form">Word Form Questionnaire</option> </select>
+
+        <div id="drop-area" class="disabled"> <p>Drag & Drop File Here or Click Below</p>
+             <p id="allowed-extensions-display" style="font-size: 0.85rem; color: #6c757d; margin-top: 8px;"></p> </div>
+
+        <label for="fileElem" id="fileLabel" class="file-label disabled">Choose File</label> <input type="file" id="fileElem" accept="" disabled> <button id="uploadButton" onclick="uploadFile()" disabled>Upload & Process</button>
+        <div id="file-name" class="file-name">Select document type first</div>
+
+        <div id="result"><p style="text-align: center; color: #6c757d;">Processing results will appear here.</p></div>
+    </div>
+
+    <script>
+        const docTypeSelect = document.getElementById("docTypeSelect");
+        const dropArea = document.getElementById("drop-area");
+        const fileInput = document.getElementById("fileElem");
+        const fileLabel = document.getElementById("fileLabel"); // Get the label too
+        const fileNameDisplay = document.getElementById("file-name");
+        const resultDiv = document.getElementById("result");
+        const uploadButton = document.getElementById("uploadButton");
+        const allowedExtDisplay = document.getElementById("allowed-extensions-display");
+
+        // --- Event Listeners and Helper Functions (handleDocTypeChange, resetFileInput, checkFileSelected, etc.) ---
+        // --- These remain the same as the previous version ---
+        docTypeSelect.addEventListener("change", handleDocTypeChange);
+        fileInput.addEventListener("change", checkFileSelected);
+        dropArea.addEventListener("click", () => {
+             if (!dropArea.classList.contains('disabled')) {
+                fileInput.click();
+             }
+        });
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+        ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, highlight, false));
+        ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, unhighlight, false));
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDocTypeChange() {
+            const selectedType = docTypeSelect.value;
+            resetFileInput();
+            if (selectedType) {
+                fileInput.disabled = false;
+                dropArea.classList.remove('disabled');
+                fileLabel.classList.remove('disabled');
+                fileNameDisplay.textContent = "No file selected";
+                if (selectedType === "passport" || selectedType === "aadhaar") {
+                    fileInput.accept = "image/png, image/jpeg, image/jpg";
+                    allowedExtDisplay.textContent = "Allowed: .png, .jpg, .jpeg";
+                } else if (selectedType === "word_form") {
+                    fileInput.accept = ".docx, application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    allowedExtDisplay.textContent = "Allowed: .docx";
+                }
+            } else {
+                fileInput.disabled = true;
+                dropArea.classList.add('disabled');
+                fileLabel.classList.add('disabled');
+                uploadButton.disabled = true;
+                fileNameDisplay.textContent = "Select document type first";
+                allowedExtDisplay.textContent = "";
+                fileInput.accept = "";
+            }
+            checkFileSelected();
+        }
+        function resetFileInput() {
+             fileInput.value = null;
+             fileNameDisplay.textContent = docTypeSelect.value ? "No file selected" : "Select document type first";
+             uploadButton.disabled = true;
+             resultDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">Processing results will appear here.</p>';
+        }
+        function checkFileSelected() {
+            const docTypeSelected = !!docTypeSelect.value;
+            const fileSelected = fileInput.files.length > 0;
+            if (docTypeSelected && fileSelected) {
+                uploadButton.disabled = false;
+                displayFileName();
+            } else {
+                uploadButton.disabled = true;
+                 if (docTypeSelected && !fileSelected) { fileNameDisplay.textContent = "No file selected"; }
+                 else if (!docTypeSelected) { fileNameDisplay.textContent = "Select document type first"; }
+            }
+        }
+        function displayFileName() {
+            const file = fileInput.files[0];
+            if (file) { fileNameDisplay.textContent = `Selected File: ${file.name}`; }
+        }
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        function highlight(e) { if (!dropArea.classList.contains('disabled')) { dropArea.classList.add('highlight'); } }
+        function unhighlight(e) { dropArea.classList.remove('highlight'); }
+        function handleDrop(e) {
+             if (dropArea.classList.contains('disabled')) return;
+            const dt = e.dataTransfer; const files = dt.files;
+            if (files.length > 0) {
+                const selectedType = docTypeSelect.value; const droppedFile = files[0]; let isValidDrop = false;
+                if ((selectedType === 'passport' || selectedType === 'aadhaar') && droppedFile.type.startsWith('image/')) { isValidDrop = true; }
+                else if (selectedType === 'word_form' && (droppedFile.name.toLowerCase().endsWith('.docx') || droppedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) { isValidDrop = true; }
+                if (isValidDrop) { fileInput.files = files; checkFileSelected(); }
+                else { resultDiv.innerHTML = `<p class='error'>❌ Dropped file type does not match the selected document type (${docTypeSelect.options[docTypeSelect.selectedIndex].text}).</p>`; uploadButton.disabled = true; }
+            }
+        }
+        // --- End Helper Functions ---
+
+
+        function uploadFile() {
+            const file = fileInput.files[0];
+            const selectedDocType = docTypeSelect.value; // Get selected type *value* (e.g., "passport")
+            const selectedDocTypeText = docTypeSelect.options[docTypeSelect.selectedIndex].text; // Get display text
+
+            if (!selectedDocType) {
+                 resultDiv.innerHTML = "<p class='error'>❌ Please select a document type first.</p>";
+                 return;
+            }
+            if (!file) {
+                resultDiv.innerHTML = "<p class='error'>❌ Please select a file first.</p>";
+                return;
+            }
+
+            // Optional client-side file check (improves UX)
+            let fileCheckOK = false;
+            if ((selectedDocType === 'passport' || selectedDocType === 'aadhaar') && file.type.startsWith('image/')) { fileCheckOK = true; }
+            else if (selectedDocType === 'word_form' && (file.name.toLowerCase().endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) { fileCheckOK = true; }
+            if (!fileCheckOK) {
+                 resultDiv.innerHTML = `<p class='error'>❌ The selected file does not appear to be a valid '${selectedDocTypeText}'. Please select the correct file or change the document type.</p>`;
+                 return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("selected_doc_type", selectedDocType); // Send selected type value
+
+            resultDiv.innerHTML = "<p class='processing-text'>⏳ Processing file... Please wait.</p>";
+            uploadButton.disabled = true;
+            docTypeSelect.disabled = true;
+
+            const timeoutDuration = 90000; // 90 seconds
+            let timeoutId = setTimeout(() => {
+                 resultDiv.innerHTML = "<p class='error'>❌ Processing timed out. The server might be busy or the file too complex. Please try again.</p>";
+                 if (fileInput.files.length > 0 && docTypeSelect.value) uploadButton.disabled = false;
+                 docTypeSelect.disabled = false;
+            }, timeoutDuration);
+
+            // --- Fetch Call with Refined Error Handling ---
+            fetch("/upload", { method: "POST", body: formData })
+            .then(response => {
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    return response.json(); // Success path
+                } else {
+                    // Non-OK response: Try to get specific error from JSON body
+                    return response.json().then(errData => {
+                        // If JSON parsed and has 'error' field, reject with that message
+                         return Promise.reject({ // Reject with an object containing details
+                            status: response.status,
+                            message: errData.error || `Server error ${response.status}`, // Use specific error or generic status
+                            isBackendError: true // Flag that this came from backend JSON
+                        });
+                    }).catch(() => {
+                        // If JSON parsing failed, reject with generic HTTP status
+                         return Promise.reject({
+                            status: response.status,
+                            message: `Server error ${response.status}: ${response.statusText}`,
+                            isBackendError: false
+                        });
+                    });
+                }
+            })
+            .then(data => {
+                 // --- SUCCESS HANDLING ---
+                 // (Existing success display logic remains the same)
+                 let fieldsHTML = "";
+                 const statusKeys = new Set([ 'db_user_status', 'db_document_status', 'message', 'gemini_analysis_status', 'gemini_analysis_raw', 'document_record_id', 'user_id', 'existing_document_record_id', '_processing_time_seconds', 'error', 'extracted_data_preview', 'Detected Document Type' ]);
+                 const previewData = data.extracted_data_preview || {};
+                 let hasFields = false;
+                 for (const key in previewData) { if (previewData.hasOwnProperty(key)) { const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); fieldsHTML += `<li><strong>${formattedKey}:</strong> <span>${previewData[key] || 'N/A'}</span></li>`; hasFields = true; } }
+                 if (hasFields) { fieldsHTML = `<h3 style='color: #0056b3; text-align:center; margin-bottom: 15px;'>📄 Extracted Fields:</h3><ul>${fieldsHTML}</ul>`; }
+                 else if (!data.error && data.message && !data.db_document_status?.includes("Skipped (Already Exists)")) { fieldsHTML = `<p style="text-align:center; color: #155724; font-weight: 500;">${data.message}</p>`; }
+                 else if (!data.error && !data.message) { fieldsHTML = `<p style="text-align:center; color: #6c757d;">No specific fields extracted or processing skipped.</p>`; }
+                 let statusHTML = "<div class='status-section'>"; let hasStatusInfo = false;
+                 if (data["Detected Document Type"]) { statusHTML += `<p><strong>Detected Type:</strong> ${data["Detected Document Type"]}</p>`; hasStatusInfo = true; }
+                 if (data.message) { statusHTML += `<p><strong>Status:</strong> ${data.message}</p>`; hasStatusInfo = true; }
+                 if (data.db_user_status) { let c = data.db_user_status.includes("Success") ? 's' : data.db_user_status.includes("Failed") ? 'e' : 'k'; statusHTML += `<p class="db-status-${c==='s'?'success':c==='e'?'error':'skipped'}"><strong>User Record:</strong> ${data.db_user_status}</p>`; hasStatusInfo = true; if (data.user_id) statusHTML += `<p style="font-size:0.85em;">User ID: ${data.user_id}</p>`; }
+                 if (data.db_document_status) { let c = data.db_document_status.includes("Success") ? 's' : data.db_document_status.includes("Failed") ? 'e' : 'k'; statusHTML += `<p class="db-status-${c==='s'?'success':c==='e'?'error':'skipped'}"><strong>Document Save:</strong> ${data.db_document_status}</p>`; hasStatusInfo = true; if (data.document_record_id) statusHTML += `<p style="font-size:0.85em;">Document ID: ${data.document_record_id}</p>`; if (data.existing_document_record_id) statusHTML += `<p style="font-size:0.85em;">Existing Doc ID: ${data.existing_document_record_id}</p>`; }
+                 if (data.gemini_analysis_status && !data.gemini_analysis_status.includes("N/A")) { let c = data.gemini_analysis_status.includes("Failed") ? 'analysis-status-error' : ''; statusHTML += `<p class="${c}"><strong>AI Analysis:</strong> ${data.gemini_analysis_status}</p>`; hasStatusInfo = true; if (data.gemini_analysis_raw) { statusHTML += `<p><strong>Raw Response:</strong><pre>${data.gemini_analysis_raw}</pre></p>`; } }
+                 if (data.error) { statusHTML += `<p class="error"><strong>Error:</strong> ${data.error}</p>`; hasStatusInfo = true; }
+                 if (data._processing_time_seconds !== undefined) { statusHTML += `<p style="font-size:0.85em; color:#6c757d; text-align:right;">Processed in ${data._processing_time_seconds}s</p>`; hasStatusInfo = true; }
+                 statusHTML += "</div>";
+                 resultDiv.innerHTML = fieldsHTML + (hasStatusInfo ? statusHTML : "");
+                 // --- END SUCCESS HANDLING ---
+            })
+            .catch(err => {
+                // --- IMPROVED ERROR HANDLING ---
+                clearTimeout(timeoutId);
+                console.error("Upload error detail:", err); // Log the raw error object/details
+
+                let displayMessage = "An unexpected error occurred."; // Default message
+
+                // Use the error object passed from the .then block
+                if (err && err.message) {
+                    if (err.isBackendError) {
+                        // If it's a specific error sent from backend JSON, use it directly
+                         // You can still customize it further if needed based on content
+                         if (err.message.startsWith("Content Mismatch:") || err.message.startsWith("File Type Mismatch:") || err.message.startsWith("Validation Error:")) {
+                             // Add a prefix or rephrase if desired
+                             displayMessage = `Validation Failed: ${err.message}`;
+                         } else {
+                            displayMessage = err.message; // Use backend message as is
+                         }
+                    } else if (err.status === 400) {
+                        // If it's a generic 400 error (JSON parse failed), create a helpful message
+                        if (selectedDocTypeText && selectedDocTypeText !== '-- Select Document Type --') {
+                            // Include the selected document type name
+                            displayMessage = `The server reported an invalid request (Error 400) for the selected type '${selectedDocTypeText}'. Please ensure you uploaded the correct file type and the content matches.`;
+                         } else {
+                             displayMessage = "The server reported an invalid request (Error 400). Please check your selection and file.";
+                         }
+                    } else {
+                        // Handle other generic errors (e.g., 500 internal server error, network errors)
+                        displayMessage = err.message; // Use the generic message like "Server error 500: Internal Server Error" or "Failed to fetch"
+                         if (err.message.startsWith("Server error 5")) {
+                            displayMessage = "An internal server error occurred on the server. Please try again later or contact support."; // Friendlier 500
+                        }
+                    }
+                }
+
+                resultDiv.innerHTML = `<p class='error'>❌ Error: ${displayMessage}</p>`;
+                // --- END IMPROVED ERROR HANDLING ---
+            })
+            .finally(() => {
+                 if (fileInput.files.length > 0 && docTypeSelect.value) {
+                     uploadButton.disabled = false;
+                 }
+                 docTypeSelect.disabled = false;
+            });
+        }
+
+        // --- Initial Setup ---
+        handleDocTypeChange(); // Call once on load
+
+    </script>
+</body>
+</html>

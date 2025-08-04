@@ -11,7 +11,8 @@
   ],
   "host_permissions": [
     "https://ceac.state.gov/GenNIV/*",
-    "http://localhost:5000/*"
+    "http://localhost:5000/*",
+    "https://www.usvisascheduling.com/en-US/applicant_details/GenNIV/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -39,3 +40,4 @@
     "128": "images/icon128.png"
   }
 }
+

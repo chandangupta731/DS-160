@@ -39,8 +39,8 @@ app = Flask(__name__)
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'docx'}
 # ***** IMPORTANT: Use environment variables for sensitive keys in production *****
-API_KEY = os.environ.get("GEMINI_API_KEY", "") # Replace placeholder if needed
-MONGO_URI = os.environ.get("MONGO_URI", "")
+API_KEY = os.environ.get("GEMINI_API_KEY") # Replace placeholder if needed
+MONGO_URI = os.environ.get("MONGO_URI")
 MONGO_DB_NAME = "id_docs_db"
 MONGO_USERS_COLLECTION_NAME = "users"
 MONGO_DOCUMENTS_COLLECTION_NAME = "documents"
@@ -68,7 +68,7 @@ QUESTION_TO_KEY_MAP = {
     "Primary phone number": "primary_phone",
     "Secondary phone number": "secondary_phone",
     "Please provide a valid email address for verification.": "email",
-    "What is your current employment name?": "current_employer_name",
+    "What is your current employer name?": "current_employer_name",
     "Present Employer Address Street Address (Line 2)" : "present_employer_address_line2",
     "Present Employer Address Street Address (Line 1)": "present_employer_address_line1",
     "Briefly describe your duties and roles in the present company.": "current_employer_duties",
@@ -154,7 +154,7 @@ QUESTION_TO_KEY_MAP = {
     "List all languages you speak.": "languages_spoken",
     "Have you travelled to any countries/regions in the last 5 years? List them.": "countries_visited_last_5_years",
     "Have you contributed to any professional, social, or charitable organization? (Yes or No)": "organization_contributions",
-    "Provide Monthly Net Income Details.": "monthly_income",
+    "Monthly net income post tax deduction": "monthly_income",
     "Were you previously employed?": "previously_employed",
 
      # --- Detailed Previous Employer 1 ---

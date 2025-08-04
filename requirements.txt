@@ -1,0 +1,8 @@
+Flask
+python-dotenv
+python-docx
+pymongo
+werkzeug
+flask-cors
+paddleocr
+google-generativeai

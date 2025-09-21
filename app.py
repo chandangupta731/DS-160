@@ -1,8 +1,17 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
+import io
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import json
 import re
+from docx import Document
+from docx.shared import Pt, Inches, RGBColor
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from datetime import datetime, timedelta
+from PyPDF2 import PdfMerger
 
 # --- Docx Handling ---
 try:
@@ -37,7 +46,7 @@ app = Flask(__name__)
 
 # --- Configuration ---
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'docx'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf', 'docx', 'bmp', 'tiff', 'gif'}
 # ***** IMPORTANT: Use environment variables for sensitive keys in production *****
 API_KEY = os.environ.get("GEMINI_API_KEY") # Replace placeholder if needed
 MONGO_URI = os.environ.get("MONGO_URI")
@@ -187,37 +196,25 @@ QUESTION_TO_KEY_MAP = {
 
 
 # --- MongoDB Setup ---
-# (MongoDB setup code remains the same)
-mongo_client = None
+# --- MongoDB Connection ---
+client = None
 db = None
+docs_collection = None
 users_collection = None
-documents_collection = None
 try:
-    print(f"Connecting to MongoDB at {MONGO_URI}...")
-    # Increased timeout for potentially slower connections
-    mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000)
-    # The ismaster command is cheap and does not require auth.
-    mongo_client.admin.command('ismaster')
-    print(f"Connected. Using DB: '{MONGO_DB_NAME}'")
-    db = mongo_client[MONGO_DB_NAME]
-    users_collection = db[MONGO_USERS_COLLECTION_NAME]
-    documents_collection = db[MONGO_DOCUMENTS_COLLECTION_NAME]
-    print(f"Using collections: '{MONGO_USERS_COLLECTION_NAME}', '{MONGO_DOCUMENTS_COLLECTION_NAME}'")
-except pymongo.errors.ConnectionFailure as e:
-    print(f"FATAL: MongoDB connection failed: {e}")
-    mongo_client = None # Ensure client is None if connection fails
+    MONGO_URI = os.environ.get("MONGO_URI")
+    if not MONGO_URI:
+        raise ValueError("MONGO_URI environment variable not set.")
+    
+    client = MongoClient(MONGO_URI)
+    db = client['id_docs_db'] 
+    docs_collection = db['documents']
+    users_collection = db['users']
+    client.admin.command('ping')
+    print("✅ MongoDB connection successful.")
 except Exception as e:
-    print(f"FATAL: MongoDB setup error: {e}")
-    print(traceback.format_exc())
-    mongo_client = None # Ensure client is None on other setup errors
-
-
-# --- Helper Functions ---
-# (All helper functions remain the same: allowed_file, extract_full_text_from_word,
-# find_passport_no_in_text, extract_text_paddle, detect_document_type,
-# find_and_redact_passport_no, find_and_redact_aadhaar_no, analyze_text_with_gemini,
-# compute_unique_identifiers, extract_data_from_word, sanitize_mongodb_keys,
-# split_name, format_date_for_form, format_date_ddmmyyyy, parse_place_of_birth)
+    print(f"❌ Error connecting to MongoDB: {e}")
+    client = None
 
 def allowed_file(filename):
     """Checks if the file extension is allowed."""
@@ -256,7 +253,7 @@ def find_passport_no_in_text(text_content):
         print("Skipping passport number search: No text content provided.")
         return None
     # Pattern: Letter followed by 7 digits, allowing optional space after letter
-    pattern = re.compile(r'\b([A-Z]\s?\d{7})\b', re.IGNORECASE)
+    pattern = re.compile(r'\b([A-Z]\s?\d{7}|[A-Z]{2}\s?\d{6})\b', re.IGNORECASE)
     # Find all matches and sort by position
     matches = sorted(pattern.finditer(text_content), key=lambda m: m.start())
     if matches:
@@ -280,7 +277,7 @@ def extract_text_paddle(image_path, lang='en'):
     try:
         # Initialize PaddleOCR (consider making this a global instance if performance is critical)
         # use_gpu=False is safer for general compatibility
-        ocr_engine = PaddleOCR(use_angle_cls=True, lang=lang, use_gpu=False, show_log=False)
+        ocr_engine = PaddleOCR(use_textline_orientation=True, lang=lang, use_gpu=False, show_log=False)
         # Perform OCR
         result = ocr_engine.ocr(image_path, cls=True)
         extracted_text = ""
@@ -320,7 +317,7 @@ def detect_document_type(text_content):
 
     # Regular expressions for typical ID patterns
     # Passport MRZ-like pattern (Letter followed by 7 digits, optional space)
-    passport_pattern = re.compile(r'\b([A-Z]\s?\d{7})\b', re.IGNORECASE)
+    passport_pattern = re.compile(r'\b([A-Z]\s?\d{7}|[A-Z]{2}\s?\d{6})\b', re.IGNORECASE)
     # Aadhaar pattern (12 digits, possibly with spaces)
     aadhaar_pattern = re.search(r'\b\d{4}\s?\d{4}\s?\d{4}\b', text_lower)
 
@@ -368,7 +365,7 @@ def find_and_redact_passport_no(text):
 
     # Current pattern: A letter, an optional space, 7 digits, followed by a word boundary. Case-insensitive.
     # Leading \b was removed in a previous iteration to allow matching if stuck to preceding word characters.
-    pattern = re.compile(r'([A-Z]\s?\d{7})\b', re.IGNORECASE)
+    pattern = re.compile(r'\b([A-Z]\s?\d{7}|[A-Z]{2}\s?\d{6})\b', re.IGNORECASE)
 
     found_number = None
     redacted_text = text
@@ -427,7 +424,7 @@ def find_and_redact_passport_no(text):
         # Debug Step 4: Check if the *original strict pattern* (with both \b) would have matched anything
         # This helps understand if the previous iteration's change (removing leading \b) was relevant
         # or if the problem is more fundamental.
-        original_strict_pattern = re.compile(r'\b([A-Z]\s?\d{7})\b', re.IGNORECASE)
+        original_strict_pattern = re.compile(r'\b([A-Z]\s?\d{7}|[A-Z]{2}\s?\d{6})\b', re.IGNORECASE)
         strict_matches = list(original_strict_pattern.finditer(text))
         if strict_matches:
             print(f"DEBUG: The original stricter pattern r'\\b([A-Z]\\s?\\d{{7}})\\b' WOULD have found {len(strict_matches)} match(es). This implies the context around the number might be tricky for word boundaries.")
@@ -766,23 +763,480 @@ def parse_place_of_birth(pob_str):
         # No usable parts found
         return None, None
 
+def format_country_list(countries_str):
+    """Formats a comma-separated string of countries into a grammatically correct list."""
+    if not countries_str:
+        return ""
+    countries = [c.strip() for c in countries_str.split(',')]
+    if len(countries) > 2:
+        return f"{', '.join(countries[:-1])}, and {countries[-1]}"
+    elif len(countries) == 2:
+        return f"{countries[0]} and {countries[1]}"
+    else:
+        return countries_str
+    
+def generate_itinerary_with_gemini(name, countries_plan, start_date_str, end_date_str):
+    """
+    Calls the Gemini API to generate and validate a structured travel itinerary.
+    """
+    if not API_KEY:
+        return None, "Gemini API key is not configured on the server."
+
+    model = genai.GenerativeModel(
+        model_name='gemini-1.5-pro',
+        generation_config={"response_mime_type": "application/json"}
+    )
+    
+    countries_plan_str = ", ".join([f"{item['country']} ({item['stay']} days)" for item in countries_plan])
+    countries_str = ", ".join([item['country'] for item in countries_plan])
+
+    base_prompt = f"""
+    Act as a meticulous travel agent. Your primary function is to create a detailed, realistic, and professional itinerary from a first-person perspective based on the user's exact day allocation.
+
+    **User Input:**
+    - Traveler's Name: {name}
+    - Travel Dates: {start_date_str} to {end_date_str}
+    - **Mandatory Country-Level Structure**: {countries_plan_str}
+
+    **Your Task:**
+    Generate a complete itinerary in a valid JSON format that STRICTLY follows the user's plan and the full JSON schema below.
+
+    **Itinerary Logic Rules (NON-NEGOTIABLE):**
+    1.  **Break Down by City**: First, decide on the cities to visit within each country.
+    2.  **Create City-Level Day Plan**: Based on your city choices, create a city-by-city day allocation that adds up to the user's country-level plan.
+    3.  **Exact Row Count**: The `detailed_itinerary` array you generate MUST contain an exact number of items for each CITY based on YOUR city-level plan.
+    4.  **Travel Day Placement**: The activity for traveling between cities (both within the same country and between different countries) occurs on the *first row* of the *next city's block*. All such travel must be described as a **morning** journey.
+
+    **JSON Schema and Instructions (All keys are mandatory):**
+    {{
+      "trip_info": {{
+        "first_entry_country": "String",
+        "trip_duration_days": "Integer",
+        "number_of_countries": "Integer"
+      }},
+      "city_stay_allocation": [
+        {{ "city": "String", "stay": "Integer" }}
+      ],
+      "key_highlights": [
+        {{ "city": "String", "country": "String", "description": "String (A detailed, 4-5 line paragraph...)" }}
+      ],
+      "hotel_stays": [
+        {{ "city": "String", "country": "String", "start_date": "String (Month Day, Year)", "end_date": "String (Month Day, Year)" }}
+      ],
+      "detailed_itinerary": [
+        {{ "date": "String (Day Mon Year)", "location": "String (City, Country)", "activity": "String (A highly realistic and practical, 2-3 sentence summary in the future tense. **Vary sentence structure to avoid repetition; do not start every sentence with 'I will'.** The plan should be logistically sound, grouping nearby attractions. Mention specific sites or neighborhoods, and suggest a type of local meal.')" }}
+      ],
+      "journey_summary": "String (A single paragraph summarizing the trip's flow...)"
+    }}
+    """ # CHANGED: Added instruction to vary sentence structure.
+
+    for attempt in range(3):
+        prompt = base_prompt
+        if attempt > 0:
+            prompt += "\n\n**CORRECTION**: Your previous response was invalid. Re-generate the itinerary, paying strict attention to the rules, especially the JSON schema and day counts."
+            
+        try:
+            response = model.generate_content(prompt)
+            cleaned_json = response.text.strip().replace('```json', '').replace('```', '').strip()
+            itinerary_data = json.loads(cleaned_json)
+
+            # --- VALIDATION LOGIC ---
+            is_valid = True
+            
+            required_keys = ['trip_info', 'key_highlights', 'detailed_itinerary', 'journey_summary', 'city_stay_allocation']
+            if not all(key in itinerary_data for key in required_keys):
+                print(f"Validation Failed on attempt {attempt+1}: Missing top-level keys.")
+                is_valid = False
+            elif 'first_entry_country' not in itinerary_data.get('trip_info', {}):
+                print(f"Validation Failed on attempt {attempt+1}: Missing 'first_entry_country'.")
+                is_valid = False
+
+            if is_valid:
+                total_requested_days = sum(int(p['stay']) for p in countries_plan)
+                total_ai_days = len(itinerary_data.get('detailed_itinerary', []))
+                if total_ai_days != total_requested_days:
+                    print(f"Validation Failed on attempt {attempt+1}: Day count mismatch.")
+                    is_valid = False
+
+            if is_valid:
+                itinerary_data['countries_list_str'] = countries_str
+                return itinerary_data, None
+
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed with error: {e}")
+    
+    return None, "Failed to generate a valid itinerary after multiple attempts."
+
+def generate_cover_letter_with_gemini(user_data):
+    """ Calls Gemini to generate key highlights for a cover letter. """
+    model = genai.GenerativeModel('gemini-1.5-pro', generation_config={"response_mime_type": "application/json"})
+    prompt = f"""
+    Act as a visa application assistant. Based on the user's travel plan, generate a "key_highlights" section for their cover letter.
+    **User Input:**
+    - Countries to Visit: {user_data['countries']}
+    - Duration: {user_data['total_duration']} days
+    **Your Task:**
+    Generate a JSON object containing a 'key_highlights' array. Each item in the array should be an object with 'city', 'country', and a compelling 'description' paragraph (3-4 lines, first-person perspective) for the main cities a tourist would visit in the given countries.
+    """
+    try:
+        response = model.generate_content(prompt)
+        return json.loads(response.text.strip().replace('```json', '').replace('```', '')), None
+    except Exception as e:
+        return None, f"Failed to generate cover letter highlights: {e}"
+
+# --- Word Document Generation ---
+
+def create_itinerary_document(data, traveler_info):
+    """
+    Generates a .docx itinerary based on the structured data.
+    """
+    doc = Document()
+    
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Arial'
+    font.size = Pt(11)
+
+    for i in range(1, 7):
+        if f'Heading {i}' in doc.styles:
+            heading_style = doc.styles[f'Heading {i}']
+            heading_font = heading_style.font
+            heading_font.name = 'Arial'
+            heading_font.size = Pt(18)
+            heading_font.color.rgb = RGBColor(0, 0, 0)
+
+    def set_spacing(paragraph, space_after=Pt(6)):
+        paragraph.paragraph_format.space_after = space_after
+
+    def add_info_line(key, value):
+        p = doc.add_paragraph()
+        p.add_run(f'{key}: ').bold = True
+        p.add_run(value)
+        set_spacing(p)
+
+    title = doc.add_paragraph(f"Schengen Visa Itinerary: {data['trip_info']['first_entry_country']}")
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title_run = title.runs[0]
+    title_run.font.size = Pt(18)
+    title_run.font.bold = True
+    title_run.font.color.rgb = RGBColor(0, 0, 0)
+    set_spacing(title, Pt(12))
+
+    formatted_countries = format_country_list(data['countries_list_str'])
+    add_info_line("Traveler's Name", traveler_info['name'])
+    add_info_line("Passport Number", traveler_info['passport_number'])
+    add_info_line("Travel Dates", f"{traveler_info['start_date']} – {traveler_info['end_date']}")
+    add_info_line("Countries", formatted_countries)
+    doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
+
+    p_dear = doc.add_paragraph("Dear Visa Officer,")
+    set_spacing(p_dear, Pt(12))
+    
+    p1 = doc.add_paragraph()
+    p1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p1.add_run("I am writing to apply for a Schengen visa to travel to ")
+    p1.add_run(formatted_countries).bold = True
+    p1.add_run(" for tourism purposes. My intended dates of travel are from ")
+    p1.add_run(traveler_info['start_date']).bold = True
+    p1.add_run(" to ")
+    p1.add_run(traveler_info['end_date']).bold = True
+    p1.add_run(".")
+    set_spacing(p1, Pt(12))
+
+    first_entry_city = data['key_highlights'][0]['city']
+    first_entry_country = data['trip_info']['first_entry_country']
+    p2 = doc.add_paragraph()
+    p2.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p2.add_run("As per the Schengen regulations, I am submitting my application to the Embassy/Consulate General of ")
+    p2.add_run(first_entry_country).bold = True
+    p2.add_run(" because my port of first entry into the Schengen Area will be ")
+    p2.add_run(f"{first_entry_city}, {first_entry_country}.").bold = True
+    set_spacing(p2, Pt(12))
+
+    p3 = doc.add_paragraph()
+    p3.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p3.add_run(f"This {data['trip_info']['trip_duration_days']}-day trip covers {data['trip_info']['number_of_countries']} beautiful European countries: ")
+    p3.add_run(formatted_countries).bold = True
+    p3.add_run(". ")
+    p3.add_run(data['journey_summary'])
+    set_spacing(p3, Pt(12))
+    
+    doc.add_heading("Key Highlights:", level=2)
+    city_stays = {item['city']: item['stay'] for item in data.get('city_stay_allocation', [])}
+    
+    for highlight in data['key_highlights']:
+        city = highlight['city']
+        country = highlight['country']
+        stay_length = city_stays.get(city, '')
+        
+        p = doc.add_paragraph(style='List Bullet')
+        p.add_run(f"{city}, {country} [{stay_length} days]").bold = True
+        set_spacing(p, Pt(2))
+        
+        desc_p = doc.add_paragraph(highlight['description'])
+        desc_p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        desc_p.paragraph_format.left_indent = Inches(0.25)
+        set_spacing(desc_p, Pt(12))
+    
+    doc.add_heading("Summary of Hotel Stays:", level=2)
+    if 'hotel_stays' in data:
+        for hotel in data['hotel_stays']:
+            p = doc.add_paragraph(style='List Bullet')
+            p.add_run(f"{hotel['city']}, {hotel['country']} ({hotel['start_date']} - {hotel['end_date']})").bold = True
+            set_spacing(p, Pt(6))
+            
+            sub_p1 = doc.add_paragraph("○ Hotel Name: ", style='List 2'); set_spacing(sub_p1, Pt(2))
+            sub_p2 = doc.add_paragraph("○ Location: ", style='List 2'); set_spacing(sub_p2, Pt(2))
+            sub_p3 = doc.add_paragraph("○ Booking Details: ", style='List 2'); set_spacing(sub_p3, Pt(6))
+    doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
+
+    doc.add_heading("Summary of Flight Tickets:", level=2)
+    p_arr = doc.add_paragraph(style='List Bullet'); p_arr.add_run(f"Arrival ({traveler_info['start_date']})").bold = True; set_spacing(p_arr, Pt(6))
+    sub_arr1 = doc.add_paragraph("○ Airline name: ", style='List 2'); set_spacing(sub_arr1, Pt(2))
+    sub_arr2 = doc.add_paragraph("○ PNR No: ", style='List 2'); set_spacing(sub_arr2, Pt(6))
+    
+    p_dep = doc.add_paragraph(style='List Bullet'); p_dep.add_run(f"Departure ({traveler_info['end_date']})").bold = True; set_spacing(p_dep, Pt(6))
+    sub_dep1 = doc.add_paragraph("○ Airline Name: ", style='List 2'); set_spacing(sub_dep1, Pt(2))
+    sub_dep2 = doc.add_paragraph("○ PNR No: ", style='List 2'); set_spacing(sub_dep2, Pt(6))
+    doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
+
+    doc.add_page_break()
+    doc.add_heading("Detailed Itinerary:", level=2)
+    table = doc.add_table(rows=1, cols=4)
+    table.style = 'Table Grid'
+    hdr_cells = table.rows[0].cells
+    
+    table.columns[0].width = Inches(0.9)
+    table.columns[1].width = Inches(1.4)
+    table.columns[2].width = Inches(0.7)
+    table.columns[3].width = Inches(3.5)
+
+    headers = ['Date', 'Location', 'Hotel', 'Activity']
+    for i, header_text in enumerate(headers):
+        cell = hdr_cells[i]
+        p = cell.paragraphs[0]
+        run = p.add_run(header_text)
+        run.bold = True
+
+    for item in data['detailed_itinerary']:
+        row_cells = table.add_row().cells
+        row_cells[0].text = item['date']
+        row_cells[1].text = item['location']
+        row_cells[2].text = ''
+        
+        activity_cell = row_cells[3]
+        activity_paragraph = activity_cell.paragraphs[0]
+        activity_paragraph.text = item['activity']
+        activity_paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+    doc.add_page_break()
+    doc.add_heading("Enclosed are the supporting documents for my visa application:", level=2)
+    for item in [
+        "The completed Schengen Visa Application Form.", "My passport.", "My flight ticket reservations.",
+        "Schengen Visa Travel Health Insurance.", "Hotel reservation receipts.", "NOC from my employer.",
+        "My Bank Statements from the last six months.", "Last Three Years ITR Acknowledgment.", "Cover Letter."
+    ]:
+        p = doc.add_paragraph(item, style='List Bullet')
+        set_spacing(p, Pt(2))
+    doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
+
+    p_close1 = doc.add_paragraph("I hope you find that the details I have provided in this letter are adequate for a favorable reply to my application. Thank you for your time, and do not hesitate to contact me should you need further information.")
+    p_close1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    set_spacing(p_close1)
+    
+    doc.add_paragraph()
+
+    p_close2 = doc.add_paragraph("Best regards,")
+    set_spacing(p_close2, Pt(0))
+
+    p_close3 = doc.add_paragraph(traveler_info['name'])
+    set_spacing(p_close3, Pt(0))
+
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    return file_stream
+
+def create_cover_letter_document(data, traveler_info):
+    """ Generates the cover letter .docx file. """
+    doc = Document()
+    style = doc.styles['Normal']; font = style.font; font.name = 'Arial'; font.size = Pt(11)
+
+    for i in range(1, 7):
+        if f'Heading {i}' in doc.styles:
+            style = doc.styles[f'Heading {i}']; font = style.font; font.name = 'Arial'; font.size = Pt(18); font.color.rgb = RGBColor(0,0,0)
+
+    def set_spacing(p, after=Pt(6)): p.paragraph_format.space_after = after
+    
+    formatted_countries = format_country_list(traveler_info['countries'])
+
+    doc.add_paragraph(datetime.now().strftime('%d/%m/%Y'))
+    doc.add_paragraph(f"To,\nThe Visa Officer,\nThe Embassy of {traveler_info['countries'].split(',')[0].strip()},\n{traveler_info['embassy_city']}, India")
+    doc.add_paragraph(f"Subject: Application for {traveler_info['countries'].split(',')[0].strip()} Tourist Visa")
+    
+    p_dear = doc.add_paragraph("Dear Sir/Madam,"); set_spacing(p_dear, Pt(12))
+    p1 = doc.add_paragraph(); p1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p1.add_run(f"I, "); p1.add_run(traveler_info['name']).bold = True
+    p1.add_run(f" (Passport No: "); p1.add_run(traveler_info['passport_number']).bold = True
+    p1.add_run(f"), am submitting my application for a Schengen Tourist Visa to visit "); p1.add_run(formatted_countries).bold = True
+    p1.add_run(f" from "); p1.add_run(traveler_info['start_date']).bold = True
+    p1.add_run(" to "); p1.add_run(traveler_info['end_date']).bold = True
+    p1.add_run(f" ({traveler_info['total_duration']} days in total). The purpose of my visit is to explore the rich culture, breathtaking landscapes, and historical landmarks of these countries."); set_spacing(p1, Pt(12))
+
+    p2 = doc.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p2.add_run("I am employed full-time at "); p2.add_run(traveler_info['employer']).bold = True
+    p2.add_run(" as "); p2.add_run(traveler_info['job_title']).bold = True
+    p2.add_run(f" since {traveler_info['joining_date']}."); set_spacing(p2, Pt(12))
+    
+    p3 = doc.add_paragraph("I have the necessary financial resources to cover all expenses related to my trip, including accommodation, transportation, sightseeing, and meals. To support this, I have enclosed my bank statements, salary slips, and other relevant financial documents.")
+    p3.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    set_spacing(p3, Pt(12))
+
+    p4 = doc.add_paragraph("I have strong professional and personal commitments in India, including my stable career, significant family responsibilities, and social ties, ensuring my return after my planned trip.")
+    p4.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    set_spacing(p4, Pt(12))
+
+    doc.add_heading("Key Highlights:", level=2)
+    for highlight in data['key_highlights']:
+        p = doc.add_paragraph(style='List Bullet')
+        p.paragraph_format.left_indent = Inches(0.25)
+        p.add_run(f"{highlight['city']}, {highlight['country']}: ").bold = True
+        p.add_run(highlight['description'])
+    
+    p_sincere = doc.add_paragraph("I sincerely appreciate your time and consideration of my application. I am fully committed to complying with all visa regulations and will adhere to the laws and values of "); p_sincere.add_run(formatted_countries).bold = True; p_sincere.add_run(" throughout my visit."); p_sincere.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY; set_spacing(p_sincere, Pt(12))
+
+    p_contact = doc.add_paragraph("If any additional documentation or information is required, please feel free to contact me at "); p_contact.add_run(traveler_info['phone']).bold = True; p_contact.add_run(" or "); p_contact.add_run(traveler_info['email']).bold = True; p_contact.add_run(".Thank you for your time and consideration. I look forward to a positive response and the opportunity to experience the beauty of "); p_contact.add_run(formatted_countries).bold = True; p_contact.add_run("."); p_contact.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY; set_spacing(p_contact, Pt(12))
+    
+    doc.add_paragraph(); p_yours = doc.add_paragraph("Yours sincerely,"); set_spacing(p_yours, Pt(0))
+    p_name = doc.add_paragraph(traveler_info['name']); set_spacing(p_name, Pt(0))
+    p_phone = doc.add_paragraph(f"Contact No: {traveler_info['phone']}"); set_spacing(p_phone, Pt(0))
+    p_email = doc.add_paragraph(f"Email: {traveler_info['email']}"); set_spacing(p_email, Pt(0))
+    
+    file_stream = io.BytesIO(); doc.save(file_stream); file_stream.seek(0)
+    return file_stream
+
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    if client is None or users_collection is None:
+        return jsonify({"error": "Database connection is not available."}), 500
+    try:
+        # Fetch all users and for each user, try to find a linked passport document to get the number
+        all_users = list(users_collection.find({}, {"name": 1, "dob_yob": 1, "email": 1, "phone": 1}))
+        
+        results = []
+        for user in all_users:
+            user_id = user['_id']
+            # Find a passport document linked to this user
+            passport_doc = docs_collection.find_one(
+                {"user_id": user_id, "doc_type": "passport"},
+                {"extracted_data.Passport_No": 1}
+            )
+            passport_number = "N/A"
+            if passport_doc and 'extracted_data' in passport_doc and 'Passport_No' in passport_doc['extracted_data']:
+                passport_number = passport_doc['extracted_data']['Passport_No']
+
+            results.append({
+                "_id": str(user_id),
+                "name": user.get("name", "N/A"),
+                "passport_number": passport_number
+            })
+
+        print(f"Successfully fetched {len(results)} users with linked passport info.")
+        return jsonify(results)
+
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return jsonify({"error": "An error occurred while fetching users."}), 500
+  
+
+@app.route('/generate_document', methods=['POST'])
+def generate_document_api():
+    try:
+        user_data = request.get_json()
+        if not user_data:
+            return jsonify({"error": "No data provided"}), 400
+        doc_type = user_data.get('document_type')
+        if not doc_type:
+            return jsonify({"error": "No document type specified"}), 400
+
+        if doc_type == 'itinerary':
+            required_fields = ['name', 'passport_number', 'start_date', 'end_date', 'countries_plan']
+            missing = [field for field in required_fields if field not in user_data]
+            if missing:
+                return jsonify({"error": f"Missing required itinerary fields: {', '.join(missing)}"}), 400
+            generated_data, error = generate_itinerary_with_gemini(user_data['name'], user_data['countries_plan'], user_data['start_date'], user_data['end_date'])
+            if error or not generated_data:
+                return jsonify({"error": error or "Failed to generate itinerary"}), 500
+            doc_stream = create_itinerary_document(generated_data, user_data)
+            filename = "Schengen_Visa_Itinerary.docx"
+
+        elif doc_type == 'cover_letter':
+            required_fields = ['name', 'passport_number', 'start_date', 'end_date', 'countries', 'total_duration', 'employer', 'job_title', 'phone', 'email']
+            missing = [field for field in required_fields if field not in user_data]
+            if missing:
+                return jsonify({"error": f"Missing required cover letter fields: {', '.join(missing)}"}), 400
+            generated_data, error = generate_cover_letter_with_gemini(user_data)
+            if error or not generated_data:
+                return jsonify({"error": error or "Failed to generate cover letter"}), 500
+            doc_stream = create_cover_letter_document(generated_data, user_data)
+            filename = "Visa_Cover_Letter.docx"
+
+        else:
+            return jsonify({"error": "Invalid document type specified"}), 400
+
+        return send_file(
+            doc_stream,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+    except Exception as e:
+        import traceback
+        print(f"Error in /generate_document: {e}")
+        print(traceback.format_exc())
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route('/merge_pdfs', methods=['POST'])
+def merge_pdfs_api():
+    if 'files' not in request.files:
+        return jsonify({"error": "No files were uploaded."}), 400
+    files = request.files.getlist('files')
+    if len(files) < 2:
+        return jsonify({"error": "Please upload at least two PDF files to merge."}), 400
+    
+    merger = PdfMerger()
+    try:
+        for pdf_file in files:
+            merger.append(pdf_file)
+        
+        pdf_stream = io.BytesIO()
+        merger.write(pdf_stream)
+        merger.close()
+        pdf_stream.seek(0)
+
+        return send_file(
+            pdf_stream,
+            as_attachment=True,
+            download_name='merged_document.pdf',
+            mimetype='application/pdf'
+        )
+    except Exception as e:
+        print(f"Error merging PDFs: {e}")
+        return jsonify({"error": f"An error occurred while merging the PDFs. Details: {e}"}), 500
 
 # --- Flask Routes ---
 
 @app.route('/', methods=['GET'])
 def index():
     """Renders the main upload page."""
-    if mongo_client is None:
+    if client is None:
         # Provide a user-friendly error message if DB is down
         return "Error: Database connection is unavailable. Please try again later.", 503
     print("Rendering homepage.")
-    # Create the allowed extensions string for the template
     allowed_ext_str = ", ".join(f".{ext}" for ext in sorted(list(ALLOWED_EXTENSIONS)))
-    # Pass status and allowed extensions to the template
     return render_template('index.html',
-                           allowed_ext_str=allowed_ext_str, # Pass the string here
-                           db_status="Connected" if mongo_client else "Disconnected")
-
+                           allowed_ext_str=allowed_ext_str,
+                           db_status="Connected" if client else "Disconnected")
 
 # --- Main Upload Endpoint ---
 @app.route('/upload', methods=['POST'])
@@ -794,7 +1248,7 @@ def upload():
 
     try: # Wrap main logic in try...finally for cleanup
         # Check prerequisites
-        if mongo_client is None or db is None:
+        if client is None or db is None:
             print("Error: MongoDB connection not available.")
             return jsonify({"error": "Database service is currently unavailable."}), 503
         if 'file' not in request.files:
@@ -946,13 +1400,15 @@ def upload():
             # 6. Find or Create User Record in MongoDB
             # (User creation/lookup logic remains the same)
             final_response_data["db_user_status"] = "Skipped"
-            if users_collection is not None and computed_name and computed_dob_yob:
+            # Ensure name is title case (first letter capitalized for each word)
+            title_case_name = computed_name.title() if computed_name else computed_name
+            if users_collection is not None and title_case_name and computed_dob_yob:
                 try:
-                    print(f"Attempting to find or create user: Name='{computed_name}', DOB/YOB='{computed_dob_yob}'")
-                    user_filter = {"name": computed_name, "dob_yob": computed_dob_yob}
+                    print(f"Attempting to find or create user: Name='{title_case_name}', DOB/YOB='{computed_dob_yob}'")
+                    user_filter = {"name": title_case_name, "dob_yob": computed_dob_yob}
                     user_update = {
                         "$setOnInsert": {
-                            "name": computed_name,
+                            "name": title_case_name,
                             "dob_yob": computed_dob_yob,
                             "created_at": datetime.utcnow()
                         }
@@ -968,6 +1424,16 @@ def upload():
                         print(f"User found or created successfully. User ID: {user_id}")
                         final_response_data["db_user_status"] = "Success (Found/Created via Image Data)"
                         final_response_data["user_id"] = str(user_id)
+                        # Only update phone/email for ID uploads (images)
+                        if file_ext in ['.png', '.jpg', '.jpeg']:
+                            update_fields = {}
+                            phone = request.form.get("phone")
+                            email = request.form.get("email")
+                            if phone: update_fields["phone"] = phone
+                            if email: update_fields["email"] = email
+                            if update_fields:
+                                users_collection.update_one({"_id": user_id}, {"$set": update_fields})
+                                print(f"Updated user {user_id} with phone/email: {update_fields}")
                     else:
                         print("Error: User upsert operation did not return a valid record.")
                         final_response_data["db_user_status"] = "Failed (DB Upsert Error)"
@@ -978,6 +1444,16 @@ def upload():
                          user_id = user_record['_id']
                          final_response_data["db_user_status"] = "Success (Fetched Existing User after Race Condition)"
                          final_response_data["user_id"] = str(user_id)
+                         # Only update phone/email for ID uploads (images)
+                         if file_ext in ['.png', '.jpg', '.jpeg']:
+                             update_fields = {}
+                             phone = request.form.get("phone")
+                             email = request.form.get("email")
+                             if phone: update_fields["phone"] = phone
+                             if email: update_fields["email"] = email
+                             if update_fields:
+                                 users_collection.update_one({"_id": user_id}, {"$set": update_fields})
+                                 print(f"Updated user {user_id} with phone/email: {update_fields}")
                      else:
                          print("Error: Could not fetch user even after duplicate key error.")
                          final_response_data["db_user_status"] = "Failed (Duplicate Key Resolution Error)"
@@ -1038,13 +1514,13 @@ def upload():
             # 3. Look up User ID based on the found Passport Number
             # (User lookup logic remains the same)
             final_response_data["db_user_status"] = "Pending Lookup"
-            if documents_collection is None:
+            if docs_collection is None:
                  return jsonify({"error": "Database service is currently unavailable."}), 503
             try:
                 print(f"Searching for existing Passport document with number: {passport_no_from_word} to find user ID...")
                 # Query the documents collection for a passport type doc with matching number
                 lookup_filter = {"doc_type": "passport", "extracted_data.Passport_No": passport_no_from_word}
-                matched_passport_doc = documents_collection.find_one(lookup_filter)
+                matched_passport_doc = docs_collection.find_one(lookup_filter)
 
                 if matched_passport_doc:
                     linked_user_id = matched_passport_doc.get("user_id")
@@ -1158,11 +1634,11 @@ def upload():
         # 7. Store Document Data in MongoDB (if user_id is available)
         # (DB storage logic remains the same, using backend detected `doc_type`)
         final_response_data["db_document_status"] = "Pending"
-        if user_id and documents_collection is not None:
+        if user_id and docs_collection is not None:
             try:
                 print(f"Checking for existing document of type '{doc_type}' for user: {user_id}")
                 # Check if a document of the same type already exists for this user
-                existing_doc = documents_collection.find_one({"user_id": user_id, "doc_type": doc_type})
+                existing_doc = docs_collection.find_one({"user_id": user_id, "doc_type": doc_type})
 
                 if existing_doc:
                     existing_doc_id = str(existing_doc.get('_id'))
@@ -1182,7 +1658,7 @@ def upload():
                         "gemini_analysis_status": final_response_data.get("gemini_analysis_status", "N/A")
                     }
                     print("Inserting new document record into MongoDB...")
-                    insert_result = documents_collection.insert_one(document_record)
+                    insert_result = docs_collection.insert_one(document_record)
                     inserted_doc_id = insert_result.inserted_id
                     print(f"Document record inserted successfully (ID: {inserted_doc_id})")
                     final_response_data["db_document_status"] = "Success"
@@ -1202,7 +1678,7 @@ def upload():
             print("Skipping document storage: User ID was not established.")
             if not final_response_data.get("message"):
                  final_response_data["message"] = "Could not store document data because the user could not be identified or linked."
-        elif documents_collection is None:
+        elif docs_collection is None:
              final_response_data["db_document_status"] = "Skipped (DB Error)"
 
 
@@ -1258,7 +1734,7 @@ def upload():
 # --- API Endpoint to GET ALL USERS ---
 # (get_users endpoint remains the same)
 @app.route('/api/getUsers', methods=['GET'])
-def get_users():
+def get_users_aggregation():
     """Retrieves a list of all users from the database."""
     print("\n--- API Request Received: /api/getUsers ---")
     if users_collection is None:
@@ -1298,7 +1774,7 @@ def get_form_data():
     Prioritizes Word Form data, then Passport, then Aadhaar, then User record defaults.
     """
     print("\n--- API Request Received: /api/getFormData ---")
-    if mongo_client is None: # Check primary client connection
+    if client is None: # Check primary client connection
         print("Error: MongoDB client not connected.")
         return jsonify({"message": "Database service is currently offline."}), 503
 
@@ -1326,8 +1802,8 @@ def get_form_data():
             return jsonify({"message": f"User with ID {user_id_str} not found."}), 404 # Not Found
 
         # 2. Fetch Associated Documents (Passport, Aadhaar, Word Form)
-        if documents_collection is None: return jsonify({"message": "Documents collection unavailable."}), 503
-        docs_cursor = documents_collection.find({
+        if docs_collection is None: return jsonify({"message": "Documents collection unavailable."}), 503
+        docs_cursor = docs_collection.find({
             "user_id": user_id_obj,
             "doc_type": {"$in": ["passport", "aadhaar", WORD_DOC_TYPE]}
         })
@@ -1517,6 +1993,12 @@ def get_form_data():
                     else:
                          combined_data[form_key] = user_value
 
+        # Ensure phone and email from user record are autofilled if missing
+        if combined_data.get("primary_phone") in [None, ""] and user_data.get("phone"):
+            combined_data["primary_phone"] = user_data["phone"]
+        if combined_data.get("email") in [None, ""] and user_data.get("email"):
+            combined_data["email"] = user_data["email"]
+
         if combined_data.get("surnames") is None and combined_data.get("user_record_name"):
              print("  -> Using User record Name for splitting.")
              s_name, g_names = split_name(combined_data["user_record_name"])
@@ -1578,7 +2060,7 @@ if __name__ == '__main__':
     print("Starting Flask development server...")
 
     # Final checks for critical components before starting
-    if mongo_client is None:
+    if client is None:
         print("FATAL: MongoDB connection failed during startup. Server cannot start.")
         exit(1) # Exit if DB connection failed
 

@@ -1,326 +1,616 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>ID Doc & Word Upload + DB</title>
-    <style>
-        /* --- Keep all your existing CSS styles --- */
-        body { font-family: system-ui, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #343a40; line-height: 1.6; }
-        .container { max-width: 700px; margin: 40px auto; background: #ffffff; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
-        h2 { margin-bottom: 30px; font-size: 1.8rem; color: #0056b3; font-weight: 600; } /* Adjusted size */
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Waywiz Document Hub</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Inter', sans-serif; background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Blank_map_of_Europe_and_Northern_Africa.svg/1200px-Blank_map_of_Europe_and_Northern_Africa.svg.png'); background-size: cover; background-position: center; background-attachment: fixed; }
+            .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06b6d4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            .backdrop-blur-xl { --tw-backdrop-blur: blur(24px); backdrop-filter: var(--tw-backdrop-filter); }
+            .selection-card { transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+            .selection-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #06b6d4; }
+            .drop-zone-active { border-color: #06b6d4 !important; background-color: #f0f9ff; }
+            .pdf-item.dragging { opacity: 0.5; background: #cffafe; }
+            .pdf-item.drag-over { outline: 2px solid #0891b2; outline-offset: 2px; }
+            #scanner-result ul { list-style-type: none; padding: 0; margin: 0; }
+            #scanner-result li { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; flex-wrap: wrap; }
+            #scanner-result li:last-child { border-bottom: none; }
+            #scanner-result strong { color: #0056b3; margin-right: 8px; flex-shrink: 0; }
+            #scanner-result span { text-align: right; word-break: break-all; }
+            .status-section p { margin: 5px 0; padding: 8px 12px; border-radius: 4px; font-weight: 500; font-size: 0.95rem; text-align: left;}
+            .status-section .db-status-success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+            .status-section .db-status-error, .status-section .analysis-status-error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+            .status-section .db-status-skipped { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; }
+        </style>
+    </head>
+    <body class="bg-gray-200 flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-2xl mx-auto bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 md:p-12 my-8 border border-white/30">
+            
+            <div id="selection-screen">
+                <div class="text-center mb-8">
+                    <img src="https://i.postimg.cc/R0S8Js6n/Waywiz-logo.png" alt="Waywiz Logo" class="mx-auto h-20 w-auto mb-4">
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-800">Waywiz Document Hub ✈️</h1>
+                    <p class="text-slate-600 mt-2">What would you like to do?</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div id="id-upload-card" class="selection-card cursor-pointer bg-white/70 p-6 rounded-lg border border-gray-200 text-center">
+                        <h2 class="text-xl font-bold text-slate-700">Upload ID</h2>
+                        <p class="text-slate-500 text-sm mt-2">Scan ID image and provide contact info.</p>
+                    </div>
+                    <div id="pdf-merger-card" class="selection-card cursor-pointer bg-white/70 p-6 rounded-lg border border-gray-200 text-center">
+                        <h2 class="text-xl font-bold text-slate-700">PDF Merger</h2>
+                        <p class="text-slate-500 text-sm mt-2">Combine multiple PDF files into one.</p>
+                    </div>
+                    <div id="db-doc-generator-card" class="selection-card cursor-pointer bg-white/70 p-6 rounded-lg border border-gray-200 text-center">
+                        <h2 class="text-xl font-bold text-slate-700">Generate Document (DB User)</h2>
+                        <p class="text-slate-500 text-sm mt-2">Fill form by selecting user from database (no passport required).</p>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <label for="background-upload" class="cursor-pointer text-sm text-slate-500 hover:text-cyan-600 transition">Change Background Image</label>
+                    <input type="file" id="background-upload" class="hidden" accept="image/*">
+                </div>
+            </div>
 
-        /* Style for the new dropdown */
-        select#docTypeSelect {
-            display: block;
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 25px;
-            font-size: 1rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            background-color: #fff;
-            cursor: pointer;
-            color: #495057;
-            appearance: none; /* Optional: for custom arrow later */
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Basic dropdown arrow */
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 12px;
-        }
-        select#docTypeSelect:disabled {
-             background-color: #e9ecef;
-             cursor: not-allowed;
-             opacity: 0.7;
-        }
+            <div id="form-screen" class="hidden">
+                <div class="text-center mb-8"><img src="https://i.postimg.cc/R0S8Js6n/Waywiz-logo.png" alt="Waywiz Logo" class="mx-auto h-16 w-auto mb-4"><h1 class="text-3xl md:text-4xl font-bold text-slate-800">Document Generator</h1><p class="text-slate-600 mt-2">Fill in your details below.</p></div>
+                <form id="generatorForm" onsubmit="return false;"><div class="space-y-8"><div><h3 class="text-lg font-semibold text-slate-800 border-b pb-2 mb-4">Personal Details</h3><div class="space-y-4"><div><label for="user-select" class="block text-sm font-medium text-slate-700 mb-1">Select User (Optional)</label><select id="user-select" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg"><option value="">-- Autofill from database --</option></select></div><div><label for="name" class="block text-sm font-medium text-slate-700 mb-1">Full Name</label><input type="text" id="name" name="name" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., Jane Doe" required></div><div><label for="passport" class="block text-sm font-medium text-slate-700 mb-1">Passport Number</label><input type="text" id="passport" name="passport" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., A12345678" required></div><div><label for="phone" class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label><input type="tel" id="phone" name="phone" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., +919876543210" required pattern="^\+[1-9]\d{9,14}$" title="Phone number must start with '+' followed by country code and number."><p id="phone-error" class="hidden text-red-600 text-xs mt-1">Invalid format. e.g., +919876543210</p></div><div><label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label><input type="email" id="email" name="email" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., jane.doe@example.com" required><p id="email-error" class="hidden text-red-600 text-xs mt-1">Please enter a valid email address.</p></div></div></div><div><h3 class="text-lg font-semibold text-slate-800 border-b pb-2 mb-4">Trip Details</h3><div class="space-y-4"><div><label for="start_date" class="block text-sm font-medium text-slate-700 mb-1">Trip Start Date</label><input type="date" id="start_date" name="start_date" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" required></div><div id="countries-container" class="space-y-4"></div><div class="flex justify-start mt-4"><button type="button" id="add-country-btn" class="text-sm font-medium text-cyan-600 hover:text-cyan-800 transition">+ Add Another Country</button></div><p id="total-duration-text" class="text-sm text-center text-slate-600 font-medium mt-2"></p></div></div><div><h3 class="text-lg font-semibold text-slate-800 border-b pb-2 mb-4">Employment Details <span class="text-xs font-normal text-gray-500">(For Cover Letter)</span></h3><div class="space-y-4"><div><label for="embassy_city" class="block text-sm font-medium text-slate-700 mb-1">Embassy/Consulate City</label><input type="text" id="embassy_city" name="embassy_city" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., Bengaluru"></div><div><label for="employer" class="block text-sm font-medium text-slate-700 mb-1">Employer Name</label><input type="text" id="employer" name="employer" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., Example Corp"></div><div><label for="job_title" class="block text-sm font-medium text-slate-700 mb-1">Job Title</label><input type="text" id="job_title" name="job_title" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., Software Engineer"></div><div><label for="joining_date" class="block text-sm font-medium text-slate-700 mb-1">Joining Date at Employer</label><input type="date" id="joining_date" name="joining_date" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg"></div></div></div></div><div class="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4"><button type="button" class="back-btn text-sm font-medium text-slate-600 hover:text-slate-800 transition">← Back to selection</button><div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"><button type="button" id="generate-itinerary-btn" class="w-full sm:w-auto bg-cyan-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-cyan-600 transition disabled:opacity-50">Generate Itinerary</button><button type="button" id="generate-cover-letter-btn" class="w-full sm:w-auto bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition disabled:opacity-50">Generate Cover Letter</button></div></div></form>
+            </div>
+            
+            <div id="pdf-merger-screen" class="hidden">
+                <div class="text-center mb-8"><img src="https://i.postimg.cc/R0S8Js6n/Waywiz-logo.png" alt="Waywiz Logo" class="mx-auto h-16 w-auto mb-4"><h1 class="text-3xl md:text-4xl font-bold text-slate-800">PDF Merger</h1><p class="text-slate-600 mt-2">Upload and reorder your files, then merge them.</p></div>
+                <form id="pdfMergerForm" onsubmit="return false;"><div id="drop-zone-pdf" class="flex items-center justify-center w-full"><label for="pdf-files" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-white/50 hover:bg-gray-100/50 transition"><div class="flex flex-col items-center justify-center pt-5 pb-6"><svg class="w-8 h-8 mb-4 text-slate-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg><p class="mb-2 text-sm text-slate-500"><span class="font-semibold">Click to upload</span> or drag and drop</p><p class="text-xs text-slate-500">Drag file previews to reorder them</p></div><input id="pdf-files" type="file" class="hidden" multiple accept=".pdf" /></label></div> <div id="file-list-controls" class="hidden mt-4"><h3 class="text-sm font-medium text-slate-700 mb-2">Files to Merge (Drag to Reorder):</h3><div id="pdf-file-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-3 rounded-lg border bg-slate-50 min-h-[150px]"></div></div><div class="mt-10 flex justify-between items-center"><button type="button" class="back-btn text-sm font-medium text-slate-600 hover:text-slate-800 transition">← Back to selection</button><button type="submit" id="mergeBtn" class="w-auto bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold py-3 px-8 rounded-lg hover:from-cyan-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">Merge PDFs</button></div></form>
+            </div>
 
+            <div id="id-upload-screen" class="hidden">
+                <div class="text-center mb-8">
+                    <img src="https://i.postimg.cc/R0S8Js6n/Waywiz-logo.png" alt="Waywiz Logo" class="mx-auto h-16 w-auto mb-4">
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-800">Upload ID</h1>
+                    <p class="text-slate-600 mt-2">Upload your ID, phone number, and Gmail address.</p>
+                </div>
+                <form id="idUploadForm" onsubmit="return false;">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="idTypeSelect" class="block text-sm font-medium text-slate-700 mb-1">Document Type</label>
+                            <select id="idTypeSelect" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" required>
+                                <option value="" disabled selected>-- Select Document Type --</option>
+                                <option value="passport">Passport Image</option>
+                                <option value="aadhaar">Aadhaar Image</option>
+                            </select>
+                        </div>
+                        <div id="drop-area-id" class="flex items-center justify-center w-full">
+                            <label for="idFileElem" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-white/50 hover:bg-gray-100/50 transition">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 mb-4 text-slate-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
+                                    <p class="mb-2 text-sm text-slate-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p class="text-xs text-slate-500">Allowed: .png, .jpg, .jpeg</p>
+                                </div>
+                                <input id="idFileElem" type="file" class="hidden" accept=".png,.jpg,.jpeg,.pdf,.docx,.bmp,.tiff,.gif,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/bmp,image/tiff,image/gif" />
+                            </label>
+                        </div>
+                        <p id="id-file-name" class="text-sm text-center text-slate-600 font-medium"></p>
+                        <div>
+                            <label for="idPhone" class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                            <input type="tel" id="idPhone" name="idPhone" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., +919876543210" required pattern="^\+[1-9]\d{9,14}$" title="Phone number must start with '+' followed by country code and number.">
+                            <p id="id-phone-error" class="hidden text-red-600 text-xs mt-1">Invalid format. e.g., +919876543210</p>
+                        </div>
+                        <div>
+                            <label for="idEmail" class="block text-sm font-medium text-slate-700 mb-1">Gmail Address</label>
+                            <input type="email" id="idEmail" name="idEmail" class="w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="e.g., jane.doe@gmail.com" required>
+                            <p id="id-email-error" class="hidden text-red-600 text-xs mt-1">Please enter a valid Gmail address.</p>
+                        </div>
+                    </div>
+                    <div class="mt-10 flex justify-between items-center">
+                        <button type="button" class="back-btn text-sm font-medium text-slate-600 hover:text-slate-800 transition">← Back to selection</button>
+                        <button type="submit" id="idUploadButton" class="w-auto bg-gradient-to-r from-teal-500 to-green-500 text-white font-semibold py-3 px-8 rounded-lg hover:from-teal-600 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed">Upload & Process</button>
+                    </div>
+                </form>
+                <div id="id-upload-result" class="mt-4 p-4 border rounded-lg bg-slate-50/50 min-h-[100px]">
+                    <p class="text-slate-500 text-center">Processing results will appear here.</p>
+                </div>
 
-        #drop-area { border: 3px dashed #adb5bd; padding: 40px; margin-bottom: 25px; border-radius: 8px; transition: background-color 0.2s ease, border-color 0.2s ease; cursor: pointer; background-color: #f1f3f5; }
-        #drop-area.highlight { background-color: #e7f5ff; border-color: #007bff; }
-        #drop-area.disabled {
-            background-color: #e9ecef;
-            border-color: #ced4da;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        #drop-area p { color: #495057; font-size: 1.1rem; margin: 0; font-weight: 500; }
-        .file-label, button { display: inline-block; padding: 12px 28px; font-size: 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease; border: none; margin: 5px; }
-        .file-label { background-color: #007bff; color: white; }
-        .file-label:hover { background-color: #0056b3; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .file-label.disabled { /* Style for disabled label */
-            background-color: #ced4da;
-            cursor: not-allowed;
-            box-shadow: none;
-             opacity: 0.7;
-        }
-        button { background-color: #28a745; color: white; }
-        button:disabled { background-color: #ced4da; cursor: not-allowed; box-shadow: none; }
-        button:hover:not(:disabled) { background-color: #218838; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #fileElem { display: none; }
-        #file-name { font-size: 0.9rem; color: #6c757d; margin-top: 15px; margin-bottom: 20px; text-align: center; min-height: 18px; word-wrap: break-word; }
-        #result { margin-top: 35px; font-size: 1rem; color: #212529; text-align: left; background-color: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; min-height: 50px; word-wrap: break-word; }
-        #result ul { list-style-type: none; padding: 0; margin: 0; }
-        #result li { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; flex-wrap: wrap; }
-        #result li:last-child { border-bottom: none; }
-        #result strong { color: #0056b3; margin-right: 8px; flex-shrink: 0; }
-        #result span { text-align: right; word-break: break-all; }
-        .processing-text { color: #007bff; font-size: 1.1rem; font-weight: 600; text-align: center; padding: 10px 0; }
-        .error, #result .error strong { color: #dc3545 !important; font-weight: bold; }
-        .status-section { margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef; }
-        .status-section p { margin: 5px 0; padding: 8px 12px; border-radius: 4px; font-weight: 500; font-size: 0.95rem; } /* Slightly smaller status text */
-        .status-section .db-status-success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .status-section .db-status-error, .status-section .analysis-status-error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
-        .status-section .db-status-skipped, .status-section .db-status-na { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; } /* Added NA style */
-        .status-section pre { white-space: pre-wrap; word-wrap: break-word; background: #e9ecef; padding: 10px; margin-top: 5px; border-radius: 4px; max-height: 150px; overflow-y: auto; font-size: 0.85rem; }
+                <!-- Preview Section: Show extracted info before uploading to DB and next step -->
+                <div id="id-preview-screen" class="hidden mt-4 p-4 border rounded-lg bg-slate-50/50 min-h-[100px]">
+                    <h3 class="text-xl font-bold text-cyan-700 mb-4 text-center">Preview Extracted Details</h3>
+                    <div id="id-preview-fields"></div>
+                    <div class="flex justify-center gap-6 mt-6">
+                        <button type="button" id="preview-confirm-btn" class="bg-cyan-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-cyan-600 transition">Confirm & Continue</button>
+                        <button type="button" id="preview-cancel-btn" class="bg-gray-300 text-slate-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-400 transition">Cancel</button>
+                    </div>
+                </div>
+            </div>
 
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>🛂 Upload ID Document or Word File 📄 & Save</h2>
+            <div id="post-id-options-screen" class="hidden">
+                <div class="text-center mb-8">
+                    <img src="https://i.postimg.cc/R0S8Js6n/Waywiz-logo.png" alt="Waywiz Logo" class="mx-auto h-16 w-auto mb-4">
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-800">Next Step</h1>
+                    <p class="text-slate-600 mt-2">Choose what you want to do next.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="doc-generator-card" class="selection-card cursor-pointer bg-white/70 p-6 rounded-lg border border-gray-200 text-center">
+                        <h2 class="text-xl font-bold text-slate-700">Document Generator</h2>
+                        <p class="text-slate-500 text-sm mt-2">Create an Itinerary or Cover Letter.</p>
+                    </div>
+                    <div id="ds160-card" class="selection-card cursor-pointer bg-white/70 p-6 rounded-lg border border-gray-200 text-center">
+                        <h2 class="text-xl font-bold text-slate-700">DS160 Filling</h2>
+                        <p class="text-slate-500 text-sm mt-2">Upload Word documents for DS160.</p>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <button type="button" class="back-btn text-sm font-medium text-slate-600 hover:text-slate-800 transition">← Back to selection</button>
+                </div>
+            </div>
 
-        <select id="docTypeSelect">
-            <option value="" disabled selected>-- Select Document Type --</option>
-            <option value="passport">Passport Image</option>
-            <option value="aadhaar">Aadhaar Image</option>
-            <option value="word_form">Word Form Questionnaire</option> </select>
+            <div id="ds160-upload-screen" class="hidden">
+                <div class="text-center mb-8">
+                    <img src="https://i.postimg.cc/R0S8Js6n/Waywiz-logo.png" alt="Waywiz Logo" class="mx-auto h-16 w-auto mb-4">
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-800">DS160 Filling</h1>
+                    <p class="text-slate-600 mt-2">Upload your DS160 Word document.</p>
+                </div>
+                <form id="ds160Form" onsubmit="return false;">
+                    <div class="space-y-6">
+                        <div id="drop-area-ds160" class="flex items-center justify-center w-full">
+                            <label for="ds160FileElem" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-white/50 hover:bg-gray-100/50 transition">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 mb-4 text-slate-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/></svg>
+                                    <p class="mb-2 text-sm text-slate-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p class="text-xs text-slate-500">Allowed: .docx</p>
+                                </div>
+                                <input id="ds160FileElem" type="file" class="hidden" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                            </label>
+                        </div>
+                        <p id="ds160-file-name" class="text-sm text-center text-slate-600 font-medium"></p>
+                    </div>
+                    <div class="mt-10 flex justify-between items-center">
+                        <button type="button" class="back-btn text-sm font-medium text-slate-600 hover:text-slate-800 transition">← Back to selection</button>
+                        <button type="submit" id="ds160UploadButton" class="w-auto bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 px-8 rounded-lg hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed">Upload DS160</button>
+                    </div>
+                </form>
+                <div id="ds160-upload-result" class="mt-4 p-4 border rounded-lg bg-slate-50/50 min-h-[100px]">
+                    <p class="text-slate-500 text-center">Processing results will appear here.</p>
+                </div>
+            </div>
 
-        <div id="drop-area" class="disabled"> <p>Drag & Drop File Here or Click Below</p>
-             <p id="allowed-extensions-display" style="font-size: 0.85rem; color: #6c757d; margin-top: 8px;"></p> </div>
+            <div id="loader" class="hidden flex-col items-center justify-center mt-8"><div class="loader"></div><p id="loader-text" class="text-slate-600 mt-4"></p></div>
+            <div id="error-message" class="hidden mt-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300"></div>
+        </div>
 
-        <label for="fileElem" id="fileLabel" class="file-label disabled">Choose File</label> <input type="file" id="fileElem" accept="" disabled> <button id="uploadButton" onclick="uploadFile()" disabled>Upload & Process</button>
-        <div id="file-name" class="file-name">Select document type first</div>
+        <script>
+            // --- CONFIGURE PDF.js WORKER ---
+            if (window.pdfjsLib) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+            }
 
-        <div id="result"><p style="text-align: center; color: #6c757d;">Processing results will appear here.</p></div>
-    </div>
+            // --- GLOBAL STATE & CONSTANTS ---
+            let allUsers = [];
+            let currentFiles = []; // For PDF Merger
+            let draggedItem = null; // For PDF Merger
+            const schengenCountries = ["Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Italy", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Norway", "Poland", "Portugal", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland"];
 
-    <script>
-        const docTypeSelect = document.getElementById("docTypeSelect");
-        const dropArea = document.getElementById("drop-area");
-        const fileInput = document.getElementById("fileElem");
-        const fileLabel = document.getElementById("fileLabel"); // Get the label too
-        const fileNameDisplay = document.getElementById("file-name");
-        const resultDiv = document.getElementById("result");
-        const uploadButton = document.getElementById("uploadButton");
-        const allowedExtDisplay = document.getElementById("allowed-extensions-display");
+            // --- DOM ELEMENTS ---
+            const selectionScreen = document.getElementById('selection-screen');
+            const formScreen = document.getElementById('form-screen');
+            const pdfMergerScreen = document.getElementById('pdf-merger-screen');
+            const idScannerScreen = document.getElementById('id-scanner-screen');
+            const loader = document.getElementById('loader');
+            const loaderText = document.getElementById('loader-text');
+            const errorMessage = document.getElementById('error-message');
+            
+            const generateDocsCard = document.getElementById('generate-docs-card');
+            const pdfMergerCard = document.getElementById('pdf-merger-card');
+            const idScannerCard = document.getElementById('id-scanner-card');
+            document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', resetToSelectionScreen));
+            
+            // Doc Generator Elements
+            const generatorForm = document.getElementById('generatorForm');
+            const userSelect = document.getElementById('user-select');
+            const nameInput = document.getElementById('name');
+            const passportInput = document.getElementById('passport');
+            const phoneInput = document.getElementById('phone');
+            const emailInput = document.getElementById('email');
+            const phoneError = document.getElementById('phone-error');
+            const emailError = document.getElementById('email-error');
+            const countriesContainer = document.getElementById('countries-container');
+            const addCountryBtn = document.getElementById('add-country-btn');
+            const startDateInput = document.getElementById('start_date');
+            const totalDurationText = document.getElementById('total-duration-text');
+            const generateItineraryBtn = document.getElementById('generate-itinerary-btn');
+            const generateCoverLetterBtn = document.getElementById('generate-cover-letter-btn');
+            let calculatedEndDate = '';
+            let totalTripDays = 0;
+            let countryCount = 0;
 
-        // --- Event Listeners and Helper Functions (handleDocTypeChange, resetFileInput, checkFileSelected, etc.) ---
-        // --- These remain the same as the previous version ---
-        docTypeSelect.addEventListener("change", handleDocTypeChange);
-        fileInput.addEventListener("change", checkFileSelected);
-        dropArea.addEventListener("click", () => {
-             if (!dropArea.classList.contains('disabled')) {
-                fileInput.click();
-             }
-        });
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false);
-        });
-        ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, highlight, false));
-        ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, unhighlight, false));
-        dropArea.addEventListener('drop', handleDrop, false);
+            // PDF Merger Elements
+            const pdfMergerForm = document.getElementById('pdfMergerForm');
+            const dropZonePdf = document.getElementById('drop-zone-pdf');
+            const pdfFileInput = document.getElementById('pdf-files');
+            const fileListControls = document.getElementById('file-list-controls');
+            const pdfFileList = document.getElementById('pdf-file-list');
+            const mergeBtn = document.getElementById('mergeBtn');
 
-        function handleDocTypeChange() {
-            const selectedType = docTypeSelect.value;
-            resetFileInput();
-            if (selectedType) {
-                fileInput.disabled = false;
-                dropArea.classList.remove('disabled');
-                fileLabel.classList.remove('disabled');
-                fileNameDisplay.textContent = "No file selected";
-                if (selectedType === "passport" || selectedType === "aadhaar") {
-                    fileInput.accept = "image/png, image/jpeg, image/jpg";
-                    allowedExtDisplay.textContent = "Allowed: .png, .jpg, .jpeg";
-                } else if (selectedType === "word_form") {
-                    fileInput.accept = ".docx, application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                    allowedExtDisplay.textContent = "Allowed: .docx";
+            // ID Scanner Elements
+            const scannerForm = document.getElementById('scannerForm');
+            const uploadButton = document.getElementById('uploadButton');
+            const docTypeSelect = document.getElementById('docTypeSelect');
+            const fileInput = document.getElementById('fileElem');
+            const dropAreaScanner = document.getElementById('drop-area-scanner');
+            const fileNameDisplay = document.getElementById('file-name');
+            const scannerResultDiv = document.getElementById('scanner-result');
+            const allowedExtDisplay = document.getElementById('allowed-extensions-display');
+
+            // --- NAVIGATION & SCREEN MANAGEMENT ---
+            const idUploadCard = document.getElementById('id-upload-card');
+            const idUploadScreen = document.getElementById('id-upload-screen');
+            const postIdOptionsScreen = document.getElementById('post-id-options-screen');
+            const docGeneratorCard = document.getElementById('doc-generator-card');
+            const ds160Card = document.getElementById('ds160-card');
+            const ds160UploadScreen = document.getElementById('ds160-upload-screen');
+
+            idUploadCard.addEventListener('click', () => {
+                selectionScreen.classList.add('hidden');
+                idUploadScreen.classList.remove('hidden');
+            });
+            pdfMergerCard.addEventListener('click', () => {
+                selectionScreen.classList.add('hidden');
+                pdfMergerScreen.classList.remove('hidden');
+            });
+            // New block: Generate Document from DB User (no passport required)
+            const dbDocGeneratorCard = document.getElementById('db-doc-generator-card');
+            dbDocGeneratorCard && dbDocGeneratorCard.addEventListener('click', () => {
+                selectionScreen.classList.add('hidden');
+                formScreen.classList.remove('hidden');
+                populateUserDropdown();
+            });
+            docGeneratorCard && docGeneratorCard.addEventListener('click', () => {
+                postIdOptionsScreen.classList.add('hidden');
+                formScreen.classList.remove('hidden');
+                populateUserDropdown().then(() => {
+                    // Auto-select the most recently added user in the DB
+                    if (userSelect.options.length > 1) {
+                        userSelect.selectedIndex = userSelect.options.length - 1;
+                        userSelect.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+            ds160Card && ds160Card.addEventListener('click', () => {
+                postIdOptionsScreen.classList.add('hidden');
+                ds160UploadScreen.classList.remove('hidden');
+            });
+
+            document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', resetToSelectionScreen));
+
+            function resetToSelectionScreen() {
+                selectionScreen.classList.remove('hidden');
+                formScreen.classList.add('hidden');
+                pdfMergerScreen.classList.add('hidden');
+                idUploadScreen.classList.add('hidden');
+                postIdOptionsScreen.classList.add('hidden');
+                ds160UploadScreen.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                generatorForm.reset();
+                pdfMergerForm.reset();
+                countryCount = 0; countriesContainer.innerHTML = ''; addCountryBlock(); calculateTotalDuration();
+                currentFiles = []; renderFileList();
+                document.getElementById('idUploadForm').reset();
+                document.getElementById('id-file-name').textContent = '';
+                document.getElementById('id-upload-result').innerHTML = '<p class="text-slate-500 text-center">Processing results will appear here.</p>';
+                document.getElementById('ds160Form').reset();
+                document.getElementById('ds160-file-name').textContent = '';
+                document.getElementById('ds160-upload-result').innerHTML = '<p class="text-slate-500 text-center">Processing results will appear here.</p>';
+            }
+
+            // --- ID UPLOAD LOGIC ---
+            const idUploadForm = document.getElementById('idUploadForm');
+            const idTypeSelect = document.getElementById('idTypeSelect');
+            const idFileElem = document.getElementById('idFileElem');
+            const dropAreaId = document.getElementById('drop-area-id');
+            const idFileNameDisplay = document.getElementById('id-file-name');
+            const idPhoneInput = document.getElementById('idPhone');
+            const idEmailInput = document.getElementById('idEmail');
+            const idPhoneError = document.getElementById('id-phone-error');
+            const idEmailError = document.getElementById('id-email-error');
+            const idUploadButton = document.getElementById('idUploadButton');
+            const idUploadResultDiv = document.getElementById('id-upload-result');
+
+            idTypeSelect.addEventListener('change', () => {
+                idFileElem.value = null;
+                idFileNameDisplay.textContent = '';
+                idUploadButton.disabled = true;
+            });
+            idFileElem.addEventListener('change', checkIdFileSelected);
+            dropAreaId.addEventListener('click', () => { if (idTypeSelect.value) idFileElem.click(); });
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { dropAreaId.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }); });
+            ['dragenter', 'dragover'].forEach(eventName => dropAreaId.addEventListener(eventName, () => {if(idTypeSelect.value) dropAreaId.classList.add('drop-zone-active')}));
+            ['dragleave', 'drop'].forEach(eventName => dropAreaId.addEventListener(eventName, () => dropAreaId.classList.remove('drop-zone-active')));
+            dropAreaId.addEventListener('drop', handleIdDrop);
+
+            function checkIdFileSelected() {
+                idUploadButton.disabled = !(idTypeSelect.value && idFileElem.files.length > 0 && idPhoneInput.value && idEmailInput.value);
+                if (idFileElem.files.length > 0) idFileNameDisplay.textContent = `Selected: ${idFileElem.files[0].name}`;
+            }
+            function handleIdDrop(e) {
+                const dt = e.dataTransfer; const files = dt.files;
+                if (files.length > 0) {
+                    const allowedTypes = [
+                        'image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'image/bmp', 'image/tiff', 'image/gif'
+                    ];
+                    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.pdf', '.docx', '.bmp', '.tiff', '.gif'];
+                    const droppedFile = files[0];
+                    // Check by MIME type or extension
+                    let isValidDrop = allowedTypes.includes(droppedFile.type);
+                    if (!isValidDrop) {
+                        isValidDrop = allowedExtensions.some(ext => droppedFile.name.toLowerCase().endsWith(ext));
+                    }
+                    if (isValidDrop) { idFileElem.files = files; checkIdFileSelected(); }
+                    else { alert(`Dropped file type does not match the selected document type.`); }
                 }
-            } else {
-                fileInput.disabled = true;
-                dropArea.classList.add('disabled');
-                fileLabel.classList.add('disabled');
-                uploadButton.disabled = true;
-                fileNameDisplay.textContent = "Select document type first";
-                allowedExtDisplay.textContent = "";
-                fileInput.accept = "";
             }
-            checkFileSelected();
+            idPhoneInput.addEventListener('input', () => {
+                if (idPhoneInput.validity.valid) {
+                    idPhoneError.classList.add('hidden');
+                    idPhoneInput.classList.remove('border-red-500');
+                    idPhoneInput.classList.add('border-gray-300');
+                } else {
+                    idPhoneError.classList.remove('hidden');
+                    idPhoneInput.classList.remove('border-gray-300');
+                    idPhoneInput.classList.add('border-red-500');
+                }
+                checkIdFileSelected();
+            });
+            idEmailInput.addEventListener('input', () => {
+                if (idEmailInput.validity.valid) {
+                    idEmailError.classList.add('hidden');
+                    idEmailInput.classList.remove('border-red-500');
+                    idEmailInput.classList.add('border-gray-300');
+                } else {
+                    idEmailError.classList.remove('hidden');
+                    idEmailInput.classList.remove('border-gray-300');
+                    idEmailInput.classList.add('border-red-500');
+                }
+                checkIdFileSelected();
+            });
+
+            idUploadForm.addEventListener('submit', function() {
+                const file = idFileElem.files[0];
+                const selectedDocType = idTypeSelect.value;
+                const phone = idPhoneInput.value;
+                const email = idEmailInput.value;
+                if (!selectedDocType || !file || !phone || !email) { alert("Please fill all fields and select a file."); return; }
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("selected_doc_type", selectedDocType);
+                formData.append("phone", phone);
+                formData.append("email", email);
+                idUploadResultDiv.innerHTML = `<div class="flex justify-center items-center"><div class="loader"></div> <p class="ml-4 text-slate-600">Processing file...</p></div>`;
+                idUploadButton.disabled = true; idTypeSelect.disabled = true;
+                // Step 1: Get extracted data preview only (no DB save yet)
+                fetch("/upload", { method: "POST", body: formData })
+                .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok) throw new Error(data.error || 'An unknown error occurred.');
+                    let fieldsHTML = "";
+                    const previewData = data.extracted_data_preview || {};
+                    let hasFields = false;
+                    for (const key in previewData) { if (previewData.hasOwnProperty(key)) { const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); fieldsHTML += `<li><strong>${formattedKey}:</strong> <span>${previewData[key] || 'N/A'}</span></li>`; hasFields = true; } }
+                    if (hasFields) { fieldsHTML = `<h3 style='color: #0056b3; text-align:center; margin-bottom: 15px;'>📄 Extracted Fields:</h3><ul>${fieldsHTML}</ul>`; }
+                    let statusHTML = "<div class='status-section'>";
+                    if (data.message) { statusHTML += `<p><strong>Status:</strong> ${data.message}</p>`; }
+                    if (data.db_user_status) { let c = data.db_user_status.includes("Success") ? 'success' : data.db_user_status.includes("Failed") ? 'error' : 'skipped'; statusHTML += `<p class="db-status-${c}"><strong>User Record:</strong> ${data.db_user_status}</p>`; }
+                    if (data.db_document_status) { let c = data.db_document_status.includes("Success") ? 'success' : data.db_document_status.includes("Failed") ? 'error' : 'skipped'; statusHTML += `<p class="db-status-${c}"><strong>Document Save:</strong> ${data.db_document_status}</p>`; }
+                    statusHTML += "</div>";
+                    // Show preview screen before uploading to DB
+                    idUploadResultDiv.classList.add('hidden');
+                    document.getElementById('id-preview-screen').classList.remove('hidden');
+                    const previewFieldsDiv = document.getElementById('id-preview-fields');
+                    previewFieldsDiv.innerHTML = fieldsHTML + statusHTML;
+                    // Confirm/cancel navigation
+                    document.getElementById('preview-confirm-btn').onclick = function() {
+                        document.getElementById('id-preview-screen').classList.add('hidden');
+                        // Hide ID upload screen so user cannot go back to previous step
+                        idUploadScreen.classList.add('hidden');
+                        // Now show next options (simulate DB save)
+                        postIdOptionsScreen.classList.remove('hidden');
+                    };
+                    document.getElementById('preview-cancel-btn').onclick = function() {
+                        document.getElementById('id-preview-screen').classList.add('hidden');
+                        // Show ID upload screen only if cancel is pressed
+                        idUploadScreen.classList.remove('hidden');
+                    };
+                })
+                .catch(err => {
+                    errorMessage.textContent = `Error: ${err.message}`;
+                    errorMessage.classList.remove('hidden');
+                    idUploadResultDiv.innerHTML = '<p class="text-slate-500 text-center">Processing failed. Please try again.</p>';
+                })
+                .finally(() => { idUploadButton.disabled = false; idTypeSelect.disabled = false; });
+            });
+        // --- DS160 UPLOAD LOGIC ---
+        const ds160Form = document.getElementById('ds160Form');
+        const ds160FileElem = document.getElementById('ds160FileElem');
+        const dropAreaDs160 = document.getElementById('drop-area-ds160');
+        const ds160FileNameDisplay = document.getElementById('ds160-file-name');
+        const ds160UploadButton = document.getElementById('ds160UploadButton');
+        const ds160UploadResultDiv = document.getElementById('ds160-upload-result');
+
+        ds160FileElem.addEventListener('change', checkDs160FileSelected);
+        dropAreaDs160.addEventListener('click', () => { ds160FileElem.click(); });
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { dropAreaDs160.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }); });
+        ['dragenter', 'dragover'].forEach(eventName => dropAreaDs160.addEventListener(eventName, () => dropAreaDs160.classList.add('drop-zone-active')));
+        ['dragleave', 'drop'].forEach(eventName => dropAreaDs160.addEventListener(eventName, () => dropAreaDs160.classList.remove('drop-zone-active')));
+        dropAreaDs160.addEventListener('drop', handleDs160Drop);
+
+        function checkDs160FileSelected() {
+            ds160UploadButton.disabled = !(ds160FileElem.files.length > 0);
+            if (ds160FileElem.files.length > 0) ds160FileNameDisplay.textContent = `Selected: ${ds160FileElem.files[0].name}`;
         }
-        function resetFileInput() {
-             fileInput.value = null;
-             fileNameDisplay.textContent = docTypeSelect.value ? "No file selected" : "Select document type first";
-             uploadButton.disabled = true;
-             resultDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">Processing results will appear here.</p>';
-        }
-        function checkFileSelected() {
-            const docTypeSelected = !!docTypeSelect.value;
-            const fileSelected = fileInput.files.length > 0;
-            if (docTypeSelected && fileSelected) {
-                uploadButton.disabled = false;
-                displayFileName();
-            } else {
-                uploadButton.disabled = true;
-                 if (docTypeSelected && !fileSelected) { fileNameDisplay.textContent = "No file selected"; }
-                 else if (!docTypeSelected) { fileNameDisplay.textContent = "Select document type first"; }
-            }
-        }
-        function displayFileName() {
-            const file = fileInput.files[0];
-            if (file) { fileNameDisplay.textContent = `Selected File: ${file.name}`; }
-        }
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-        function highlight(e) { if (!dropArea.classList.contains('disabled')) { dropArea.classList.add('highlight'); } }
-        function unhighlight(e) { dropArea.classList.remove('highlight'); }
-        function handleDrop(e) {
-             if (dropArea.classList.contains('disabled')) return;
+        function handleDs160Drop(e) {
             const dt = e.dataTransfer; const files = dt.files;
             if (files.length > 0) {
-                const selectedType = docTypeSelect.value; const droppedFile = files[0]; let isValidDrop = false;
-                if ((selectedType === 'passport' || selectedType === 'aadhaar') && droppedFile.type.startsWith('image/')) { isValidDrop = true; }
-                else if (selectedType === 'word_form' && (droppedFile.name.toLowerCase().endsWith('.docx') || droppedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) { isValidDrop = true; }
-                if (isValidDrop) { fileInput.files = files; checkFileSelected(); }
-                else { resultDiv.innerHTML = `<p class='error'>❌ Dropped file type does not match the selected document type (${docTypeSelect.options[docTypeSelect.selectedIndex].text}).</p>`; uploadButton.disabled = true; }
+                const droppedFile = files[0];
+                if (droppedFile.name.toLowerCase().endsWith('.docx')) {
+                    ds160FileElem.files = files; checkDs160FileSelected();
+                } else { alert(`Dropped file type does not match the allowed type.`); }
             }
         }
-        // --- End Helper Functions ---
-
-
-        function uploadFile() {
-            const file = fileInput.files[0];
-            const selectedDocType = docTypeSelect.value; // Get selected type *value* (e.g., "passport")
-            const selectedDocTypeText = docTypeSelect.options[docTypeSelect.selectedIndex].text; // Get display text
-
-            if (!selectedDocType) {
-                 resultDiv.innerHTML = "<p class='error'>❌ Please select a document type first.</p>";
-                 return;
-            }
-            if (!file) {
-                resultDiv.innerHTML = "<p class='error'>❌ Please select a file first.</p>";
-                return;
-            }
-
-            // Optional client-side file check (improves UX)
-            let fileCheckOK = false;
-            if ((selectedDocType === 'passport' || selectedDocType === 'aadhaar') && file.type.startsWith('image/')) { fileCheckOK = true; }
-            else if (selectedDocType === 'word_form' && (file.name.toLowerCase().endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) { fileCheckOK = true; }
-            if (!fileCheckOK) {
-                 resultDiv.innerHTML = `<p class='error'>❌ The selected file does not appear to be a valid '${selectedDocTypeText}'. Please select the correct file or change the document type.</p>`;
-                 return;
-            }
-
+        ds160Form.addEventListener('submit', function() {
+            const file = ds160FileElem.files[0];
+            if (!file) { alert("Please select a Word document."); return; }
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("selected_doc_type", selectedDocType); // Send selected type value
-
-            resultDiv.innerHTML = "<p class='processing-text'>⏳ Processing file... Please wait.</p>";
-            uploadButton.disabled = true;
-            docTypeSelect.disabled = true;
-
-            const timeoutDuration = 90000; // 90 seconds
-            let timeoutId = setTimeout(() => {
-                 resultDiv.innerHTML = "<p class='error'>❌ Processing timed out. The server might be busy or the file too complex. Please try again.</p>";
-                 if (fileInput.files.length > 0 && docTypeSelect.value) uploadButton.disabled = false;
-                 docTypeSelect.disabled = false;
-            }, timeoutDuration);
-
-            // --- Fetch Call with Refined Error Handling ---
+            formData.append("selected_doc_type", "word_form");
+            ds160UploadResultDiv.innerHTML = `<div class="flex justify-center items-center"><div class="loader"></div> <p class="ml-4 text-slate-600">Processing file...</p></div>`;
+            ds160UploadButton.disabled = true;
             fetch("/upload", { method: "POST", body: formData })
-            .then(response => {
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    return response.json(); // Success path
-                } else {
-                    // Non-OK response: Try to get specific error from JSON body
-                    return response.json().then(errData => {
-                        // If JSON parsed and has 'error' field, reject with that message
-                         return Promise.reject({ // Reject with an object containing details
-                            status: response.status,
-                            message: errData.error || `Server error ${response.status}`, // Use specific error or generic status
-                            isBackendError: true // Flag that this came from backend JSON
-                        });
-                    }).catch(() => {
-                        // If JSON parsing failed, reject with generic HTTP status
-                         return Promise.reject({
-                            status: response.status,
-                            message: `Server error ${response.status}: ${response.statusText}`,
-                            isBackendError: false
-                        });
-                    });
-                }
-            })
-            .then(data => {
-                 // --- SUCCESS HANDLING ---
-                 // (Existing success display logic remains the same)
-                 let fieldsHTML = "";
-                 const statusKeys = new Set([ 'db_user_status', 'db_document_status', 'message', 'gemini_analysis_status', 'gemini_analysis_raw', 'document_record_id', 'user_id', 'existing_document_record_id', '_processing_time_seconds', 'error', 'extracted_data_preview', 'Detected Document Type' ]);
-                 const previewData = data.extracted_data_preview || {};
-                 let hasFields = false;
-                 for (const key in previewData) { if (previewData.hasOwnProperty(key)) { const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); fieldsHTML += `<li><strong>${formattedKey}:</strong> <span>${previewData[key] || 'N/A'}</span></li>`; hasFields = true; } }
-                 if (hasFields) { fieldsHTML = `<h3 style='color: #0056b3; text-align:center; margin-bottom: 15px;'>📄 Extracted Fields:</h3><ul>${fieldsHTML}</ul>`; }
-                 else if (!data.error && data.message && !data.db_document_status?.includes("Skipped (Already Exists)")) { fieldsHTML = `<p style="text-align:center; color: #155724; font-weight: 500;">${data.message}</p>`; }
-                 else if (!data.error && !data.message) { fieldsHTML = `<p style="text-align:center; color: #6c757d;">No specific fields extracted or processing skipped.</p>`; }
-                 let statusHTML = "<div class='status-section'>"; let hasStatusInfo = false;
-                 if (data["Detected Document Type"]) { statusHTML += `<p><strong>Detected Type:</strong> ${data["Detected Document Type"]}</p>`; hasStatusInfo = true; }
-                 if (data.message) { statusHTML += `<p><strong>Status:</strong> ${data.message}</p>`; hasStatusInfo = true; }
-                 if (data.db_user_status) { let c = data.db_user_status.includes("Success") ? 's' : data.db_user_status.includes("Failed") ? 'e' : 'k'; statusHTML += `<p class="db-status-${c==='s'?'success':c==='e'?'error':'skipped'}"><strong>User Record:</strong> ${data.db_user_status}</p>`; hasStatusInfo = true; if (data.user_id) statusHTML += `<p style="font-size:0.85em;">User ID: ${data.user_id}</p>`; }
-                 if (data.db_document_status) { let c = data.db_document_status.includes("Success") ? 's' : data.db_document_status.includes("Failed") ? 'e' : 'k'; statusHTML += `<p class="db-status-${c==='s'?'success':c==='e'?'error':'skipped'}"><strong>Document Save:</strong> ${data.db_document_status}</p>`; hasStatusInfo = true; if (data.document_record_id) statusHTML += `<p style="font-size:0.85em;">Document ID: ${data.document_record_id}</p>`; if (data.existing_document_record_id) statusHTML += `<p style="font-size:0.85em;">Existing Doc ID: ${data.existing_document_record_id}</p>`; }
-                 if (data.gemini_analysis_status && !data.gemini_analysis_status.includes("N/A")) { let c = data.gemini_analysis_status.includes("Failed") ? 'analysis-status-error' : ''; statusHTML += `<p class="${c}"><strong>AI Analysis:</strong> ${data.gemini_analysis_status}</p>`; hasStatusInfo = true; if (data.gemini_analysis_raw) { statusHTML += `<p><strong>Raw Response:</strong><pre>${data.gemini_analysis_raw}</pre></p>`; } }
-                 if (data.error) { statusHTML += `<p class="error"><strong>Error:</strong> ${data.error}</p>`; hasStatusInfo = true; }
-                 if (data._processing_time_seconds !== undefined) { statusHTML += `<p style="font-size:0.85em; color:#6c757d; text-align:right;">Processed in ${data._processing_time_seconds}s</p>`; hasStatusInfo = true; }
-                 statusHTML += "</div>";
-                 resultDiv.innerHTML = fieldsHTML + (hasStatusInfo ? statusHTML : "");
-                 // --- END SUCCESS HANDLING ---
+            .then(response => response.json().then(data => ({ ok: response.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok) throw new Error(data.error || 'An unknown error occurred.');
+                let fieldsHTML = "";
+                const previewData = data.extracted_data_preview || {};
+                let hasFields = false;
+                for (const key in previewData) { if (previewData.hasOwnProperty(key)) { const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); fieldsHTML += `<li><strong>${formattedKey}:</strong> <span>${previewData[key] || 'N/A'}</span></li>`; hasFields = true; } }
+                if (hasFields) { fieldsHTML = `<h3 style='color: #0056b3; text-align:center; margin-bottom: 15px;'>📄 Extracted Fields:</h3><ul>${fieldsHTML}</ul>`; }
+                let statusHTML = "<div class='status-section'>";
+                if (data.message) { statusHTML += `<p><strong>Status:</strong> ${data.message}</p>`; }
+                if (data.db_user_status) { let c = data.db_user_status.includes("Success") ? 'success' : data.db_user_status.includes("Failed") ? 'error' : 'skipped'; statusHTML += `<p class="db-status-${c}"><strong>User Record:</strong> ${data.db_user_status}</p>`; }
+                if (data.db_document_status) { let c = data.db_document_status.includes("Success") ? 'success' : data.db_document_status.includes("Failed") ? 'error' : 'skipped'; statusHTML += `<p class="db-status-${c}"><strong>Document Save:</strong> ${data.db_document_status}</p>`; }
+                statusHTML += "</div>";
+                ds160UploadResultDiv.innerHTML = fieldsHTML + statusHTML;
             })
             .catch(err => {
-                // --- IMPROVED ERROR HANDLING ---
-                clearTimeout(timeoutId);
-                console.error("Upload error detail:", err); // Log the raw error object/details
-
-                let displayMessage = "An unexpected error occurred."; // Default message
-
-                // Use the error object passed from the .then block
-                if (err && err.message) {
-                    if (err.isBackendError) {
-                        // If it's a specific error sent from backend JSON, use it directly
-                         // You can still customize it further if needed based on content
-                         if (err.message.startsWith("Content Mismatch:") || err.message.startsWith("File Type Mismatch:") || err.message.startsWith("Validation Error:")) {
-                             // Add a prefix or rephrase if desired
-                             displayMessage = `Validation Failed: ${err.message}`;
-                         } else {
-                            displayMessage = err.message; // Use backend message as is
-                         }
-                    } else if (err.status === 400) {
-                        // If it's a generic 400 error (JSON parse failed), create a helpful message
-                        if (selectedDocTypeText && selectedDocTypeText !== '-- Select Document Type --') {
-                            // Include the selected document type name
-                            displayMessage = `The server reported an invalid request (Error 400) for the selected type '${selectedDocTypeText}'. Please ensure you uploaded the correct file type and the content matches.`;
-                         } else {
-                             displayMessage = "The server reported an invalid request (Error 400). Please check your selection and file.";
-                         }
-                    } else {
-                        // Handle other generic errors (e.g., 500 internal server error, network errors)
-                        displayMessage = err.message; // Use the generic message like "Server error 500: Internal Server Error" or "Failed to fetch"
-                         if (err.message.startsWith("Server error 5")) {
-                            displayMessage = "An internal server error occurred on the server. Please try again later or contact support."; // Friendlier 500
-                        }
-                    }
-                }
-
-                resultDiv.innerHTML = `<p class='error'>❌ Error: ${displayMessage}</p>`;
-                // --- END IMPROVED ERROR HANDLING ---
+                errorMessage.textContent = `Error: ${err.message}`;
+                errorMessage.classList.remove('hidden');
+                ds160UploadResultDiv.innerHTML = '<p class="text-slate-500 text-center">Processing failed. Please try again.</p>';
             })
-            .finally(() => {
-                 if (fileInput.files.length > 0 && docTypeSelect.value) {
-                     uploadButton.disabled = false;
-                 }
-                 docTypeSelect.disabled = false;
+            .finally(() => { ds160UploadButton.disabled = false; });
+        });
+
+            // --- DOCUMENT GENERATOR LOGIC ---
+            phoneInput.addEventListener('input', () => { if (phoneInput.validity.valid) { phoneError.classList.add('hidden'); phoneInput.classList.remove('border-red-500'); } else { phoneError.classList.remove('hidden'); phoneInput.classList.add('border-red-500'); } });
+            emailInput.addEventListener('input', () => { if (emailInput.validity.valid) { emailError.classList.add('hidden'); emailInput.classList.remove('border-red-500'); } else { emailError.classList.remove('hidden'); emailInput.classList.add('border-red-500'); } });
+            addCountryBtn.addEventListener('click', addCountryBlock);
+            startDateInput.addEventListener('input', calculateTotalDuration);
+                startDateInput.addEventListener('input', function() {
+                    calculateTotalDuration();
+                    // Trip Start Date validation: must be in the future
+                    const startDateErrorId = 'start-date-error';
+                    let errorElem = document.getElementById(startDateErrorId);
+                    if (!errorElem) {
+                        errorElem = document.createElement('p');
+                        errorElem.id = startDateErrorId;
+                        errorElem.className = 'text-red-600 text-xs mt-1';
+                        startDateInput.parentNode.appendChild(errorElem);
+                    }
+                    const selectedDate = new Date(startDateInput.value);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    if (startDateInput.value && selectedDate < today) {
+                        errorElem.textContent = 'Trip Start Date must be in the future.';
+                        errorElem.style.display = '';
+                    } else {
+                        errorElem.textContent = '';
+                        errorElem.style.display = 'none';
+                    }
+                });
+            generateItineraryBtn.addEventListener('click', () => handleGeneration('itinerary'));
+            generateCoverLetterBtn.addEventListener('click', () => handleGeneration('cover_letter'));
+                // Joining Date at Employer validation: must be in the past
+                const joiningDateInput = document.getElementById('joining_date');
+                if (joiningDateInput) {
+                    joiningDateInput.addEventListener('input', function() {
+                        const joiningDateErrorId = 'joining-date-error';
+                        let errorElem = document.getElementById(joiningDateErrorId);
+                        if (!errorElem) {
+                            errorElem = document.createElement('p');
+                            errorElem.id = joiningDateErrorId;
+                            errorElem.className = 'text-red-600 text-xs mt-1';
+                            joiningDateInput.parentNode.appendChild(errorElem);
+                        }
+                        const selectedDate = new Date(joiningDateInput.value);
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        if (joiningDateInput.value && selectedDate > today) {
+                            errorElem.textContent = 'Joining Date must be in the past.';
+                            errorElem.style.display = '';
+                        } else {
+                            errorElem.textContent = '';
+                            errorElem.style.display = 'none';
+                        }
+                    });
+                }
+            userSelect.addEventListener('change', async (event) => {
+                const selectedUserId = event.target.value;
+                if (!selectedUserId) {
+                    nameInput.value = '';
+                    passportInput.value = '';
+                    phoneInput.value = '';
+                    emailInput.value = '';
+                    return;
+                }
+                // Fetch user details from backend
+                try {
+                    const response = await fetch(`/api/getFormData?id=${selectedUserId}`);
+                    if (!response.ok) throw new Error('Could not fetch user details.');
+                    const userData = await response.json();
+                    let fullName = userData.surnames && userData.given_names ? `${userData.given_names} ${userData.surnames}` : (userData.name || '');
+                    // Capitalize only the first letter of each word, rest lowercase
+                    if (fullName) {
+                        fullName = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                    }
+                    nameInput.value = fullName;
+                    passportInput.value = userData.passport_number || '';
+                    phoneInput.value = userData.primary_phone || userData.phone || '';
+                    emailInput.value = userData.email || '';
+                } catch (err) {
+                    nameInput.value = '';
+                    passportInput.value = '';
+                    phoneInput.value = '';
+                    emailInput.value = '';
+                }
             });
-        }
+            async function populateUserDropdown() { try { const response = await fetch('/get_users'); if (!response.ok) throw new Error('Could not fetch user data.'); allUsers = await response.json(); userSelect.innerHTML = '<option value="">-- Autofill from database --</option>'; allUsers.forEach(user => { const option = document.createElement('option'); option.value = user._id; option.textContent = `${user.name} (${user.passport_number})`; userSelect.appendChild(option); }); } catch (error) { console.error("Failed to populate users:", error); } }
+            function addCountryBlock() { countryCount++; const block = document.createElement('div'); block.className = 'p-4 border rounded-lg space-y-2 bg-gray-50/50'; const labelText = countryCount === 1 ? 'First Country (Port of Entry)' : `Country #${countryCount}`; block.innerHTML = `<div class="flex justify-between items-center"><label class="block text-sm font-medium text-slate-700">${labelText}</label>${countryCount > 1 ? '<button type="button" class="remove-country-btn text-red-500 hover:text-red-700 text-xs font-semibold">REMOVE</button>' : ''}</div><div class="flex items-center space-x-2"><select class="country-select w-full px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" required><option value="">-- Select a country --</option>${schengenCountries.map(c => `<option value="${c}">${c}</option>`).join('')}</select><input type="number" class="stay-length w-1/3 px-4 py-2 bg-white/50 border border-gray-300 rounded-lg" placeholder="Days" min="1" required></div>${countryCount === 1 ? '<p class="text-xs text-gray-500 mt-1">Your stay here must be the longest.</p>' : ''}`; countriesContainer.appendChild(block); }
+            addCountryBlock();
+            countriesContainer.addEventListener('input', e => { if (e.target.classList.contains('stay-length')) calculateTotalDuration(); });
+            countriesContainer.addEventListener('click', e => { if (e.target.classList.contains('remove-country-btn')) { e.target.closest('.p-4').remove(); countryCount--; calculateTotalDuration(); } });
+            function calculateTotalDuration() { totalTripDays = 0; document.querySelectorAll('.stay-length').forEach(input => { totalTripDays += parseInt(input.value) || 0; }); const startDate = startDateInput.value; if (startDate && totalTripDays > 0) { const start = new Date(startDate + 'T00:00:00Z'); const end = new Date(start); end.setUTCDate(start.getUTCDate() + totalTripDays - 1); calculatedEndDate = end.toISOString().split('T')[0]; totalDurationText.textContent = `Total Trip: ${totalTripDays} days (Ends on ${formatDate(calculatedEndDate)})`; } else { totalDurationText.textContent = ''; calculatedEndDate = ''; } }
+            function gatherAndValidateData(docType) { const commonFields = ["name", "passport", "phone", "email", "start_date"]; for (const id of commonFields) { const element = document.getElementById(id); if (!element.value || !element.checkValidity()) { alert(`Please fill in a valid "${element.labels[0].textContent}" field.`); return null; } } const countriesData = []; let firstCountryStay = 0; let isValidTrip = true; document.querySelectorAll('#countries-container > div').forEach((block, index) => { const country = block.querySelector('.country-select').value; const stay = parseInt(block.querySelector('.stay-length').value); if (!country || !stay || stay < 1) isValidTrip = false; if (index === 0) firstCountryStay = stay; else if (stay > firstCountryStay) { isValidTrip = false; alert('Error: The stay in the first country must be the longest.'); } countriesData.push({ country, stay }); }); if (!isValidTrip || !calculatedEndDate) { if (isValidTrip) alert("Please complete all trip details."); return null; } const payload = { document_type: docType, name: nameInput.value, passport_number: passportInput.value, start_date: formatDate(startDateInput.value), end_date: formatDate(calculatedEndDate) }; if (docType === 'itinerary') { payload.countries_plan = countriesData; } else if (docType === 'cover_letter') { const employmentFields = ["embassy_city", "employer", "job_title", "joining_date"]; for (const id of employmentFields) { const element = document.getElementById(id); if (!element.value) { alert(`Please fill in the "${element.labels[0].textContent}" field for the Cover Letter.`); return null; } } payload.countries = countriesData.map(c => c.country).join(', '); payload.total_duration = totalTripDays; payload.phone = document.getElementById('phone').value; payload.email = document.getElementById('email').value; payload.embassy_city = document.getElementById('embassy_city').value; payload.employer = document.getElementById('employer').value; payload.job_title = document.getElementById('job_title').value; payload.joining_date = formatMonthYear(document.getElementById('joining_date').value); } return payload; }
+            async function handleGeneration(docType) { const payload = gatherAndValidateData(docType); if (!payload) return; generateItineraryBtn.disabled = true; generateCoverLetterBtn.disabled = true; errorMessage.classList.add('hidden'); loaderText.textContent = `Generating ${docType.replace('_', ' ')}...`; loader.classList.remove('hidden'); try { const response = await fetch('/generate_document', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { const error = await response.json(); throw new Error(error.error || 'An unknown error occurred.'); } const blob = await response.blob(); const filename = docType === 'itinerary' ? 'Schengen_Visa_Itinerary.docx' : 'Visa_Cover_Letter.docx'; triggerFileDownload(blob, filename); } catch (error) { errorMessage.textContent = `Error: ${error.message}`; errorMessage.classList.remove('hidden'); } finally { loader.classList.add('hidden'); generateItineraryBtn.disabled = false; generateCoverLetterBtn.disabled = false; } }
+            
+            // --- PDF MERGER LOGIC ---
+            pdfMergerForm.addEventListener('submit', async function() { if (currentFiles.length < 2) { alert("Please select at least two PDF files to merge."); return; } mergeBtn.disabled = true; loaderText.textContent = 'Merging PDFs...'; loader.classList.remove('hidden'); errorMessage.classList.add('hidden'); const formData = new FormData(); currentFiles.forEach(file => { formData.append('files', file); }); try { const response = await fetch('/merge_pdfs', { method: 'POST', body: formData }); if (!response.ok) { const error = await response.json(); throw new Error(error.error || 'Could not merge PDFs.'); } const blob = await response.blob(); triggerFileDownload(blob, 'merged_document.pdf'); resetToSelectionScreen(); } catch (error) { errorMessage.textContent = `Error: ${error.message}`; errorMessage.classList.remove('hidden'); } finally { loader.classList.add('hidden'); mergeBtn.disabled = false; } });
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropZonePdf.addEventListener(e, p => { p.preventDefault(); p.stopPropagation(); }));
+            ['dragenter', 'dragover'].forEach(e => dropZonePdf.addEventListener(e, () => dropZonePdf.classList.add('drop-zone-active')));
+            ['dragleave', 'drop'].forEach(e => dropZonePdf.addEventListener(e, () => dropZonePdf.classList.remove('drop-zone-active')));
+            dropZonePdf.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+            pdfFileInput.addEventListener('change', e => handleFiles(e.target.files));
+            function handleFiles(files) { const pdfFiles = Array.from(files).filter(file => file.type === 'application/pdf'); if(pdfFiles.length !== files.length) alert('Only PDF files are accepted.'); currentFiles = [...currentFiles, ...pdfFiles]; renderFileList(); }
+            function renderFileList() { pdfFileList.innerHTML = ''; fileListControls.classList.toggle('hidden', currentFiles.length === 0); currentFiles.forEach((file, index) => { const fileCard = document.createElement('div'); fileCard.className = 'pdf-item relative p-2 border rounded-lg bg-white shadow-sm cursor-grab text-center'; fileCard.draggable = true; fileCard.dataset.index = index; const canvas = document.createElement('canvas'); canvas.className = 'w-full h-auto rounded-md bg-gray-200 aspect-[2/3]'; const fileName = document.createElement('p'); fileName.className = 'text-xs mt-2 truncate leading-tight'; fileName.textContent = file.name; fileName.title = file.name; const removeBtn = document.createElement('button'); removeBtn.innerHTML = '&times;'; removeBtn.className = 'absolute top-0 right-0 -mt-1 -mr-1 w-5 h-5 flex items-center justify-center rounded-full text-red-500 bg-white/90 border hover:bg-red-100 transition-transform transform hover:scale-110'; removeBtn.onclick = () => { currentFiles.splice(index, 1); renderFileList(); }; fileCard.appendChild(canvas); fileCard.appendChild(fileName); fileCard.appendChild(removeBtn); pdfFileList.appendChild(fileCard); generatePdfThumbnail(file, canvas); }); }
+            async function generatePdfThumbnail(file, canvas) { const fileReader = new FileReader(); fileReader.onload = async function() { try { const typedarray = new Uint8Array(this.result); const pdf = await pdfjsLib.getDocument(typedarray).promise; const page = await pdf.getPage(1); const viewport = page.getViewport({ scale: 1 }); const scale = 150 / viewport.width; const scaledViewport = page.getViewport({ scale: scale }); canvas.height = scaledViewport.height; canvas.width = scaledViewport.width; await page.render({ canvasContext: canvas.getContext('2d'), viewport: scaledViewport }).promise; } catch (error) { console.error('Error rendering PDF thumbnail', error); } }; fileReader.readAsArrayBuffer(file); }
+            pdfFileList.addEventListener('dragstart', e => { if(e.target.closest('.pdf-item')) { draggedItem = e.target.closest('.pdf-item'); setTimeout(() => draggedItem.classList.add('dragging'), 0); } });
+            pdfFileList.addEventListener('dragend', () => { if(draggedItem) { draggedItem.classList.remove('dragging'); draggedItem = null; } });
+            pdfFileList.addEventListener('dragover', e => { e.preventDefault(); const afterElement = getDragAfterElement(pdfFileList, e.clientX); document.querySelectorAll('.pdf-item.drag-over').forEach(el => el.classList.remove('drag-over')); if (afterElement) { afterElement.classList.add('drag-over'); } });
+            pdfFileList.addEventListener('drop', e => { e.preventDefault(); document.querySelectorAll('.pdf-item.drag-over').forEach(el => el.classList.remove('drag-over')); if (!draggedItem) return; const afterElement = getDragAfterElement(pdfFileList, e.clientX); const draggedIndex = parseInt(draggedItem.dataset.index); const [reorderedItem] = currentFiles.splice(draggedIndex, 1); if (afterElement == null) { currentFiles.push(reorderedItem); } else { const dropIndex = parseInt(afterElement.dataset.index); currentFiles.splice(dropIndex, 0, reorderedItem); } renderFileList(); });
+            function getDragAfterElement(container, x) { const draggableElements = [...container.querySelectorAll('.pdf-item:not(.dragging)')]; return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = x - box.left - box.width / 2; if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } else { return closest; } }, { offset: Number.NEGATIVE_INFINITY }).element; }
 
-        // --- Initial Setup ---
-        handleDocTypeChange(); // Call once on load
-
-    </script>
-</body>
-</html>
+            // --- UTILITY FUNCTIONS ---
+            function formatDate(isoDate) { if (!isoDate) return ''; const date = new Date(isoDate + 'T00:00:00Z'); const day = date.getUTCDate(); const month = date.toLocaleString('default', { month: 'long', timeZone: 'UTC' }); const year = date.getUTCFullYear(); let suffix = 'th'; if (day % 10 === 1 && day !== 11) suffix = 'st'; else if (day % 10 === 2 && day !== 12) suffix = 'nd'; else if (day % 10 === 3 && day !== 13) suffix = 'rd'; return `${day}${suffix} ${month} ${year}`; }
+            function formatMonthYear(isoDate) { if (!isoDate) return ''; const date = new Date(isoDate + 'T00:00:00Z'); return date.toLocaleString('default', { month: 'long', year: 'numeric', timeZone: 'UTC' }); }
+            function triggerFileDownload(blob, filename) { const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = filename; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); a.remove(); }
+            
+            document.getElementById('background-upload').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { document.body.style.backgroundImage = `url('${e.target.result}')`; }
+                    reader.readAsDataURL(file);
+                }
+            });
+        </script>
+    </body>
+    </html>
